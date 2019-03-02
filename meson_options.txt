@@ -1,0 +1,2 @@
+option('buildSubmodules', type : 'boolean', value : true)
+option('installDir', type : 'string', value : '/opt/Chuckle')
