@@ -31,3 +31,9 @@
 [submodule "subprojects/Tarp"]
 	path = subprojects/Tarp
 	url = https://github.com/mokafolio/Tarp.git
+[submodule "subprojects/ChuckleCore"]
+	path = subprojects/ChuckleCore
+	url = https://github.com/mokafolio/ChuckleCore.git
+[submodule "subprojects/Pic"]
+	path = subprojects/Pic
+	url = https://github.com/mokafolio/Pic.git
