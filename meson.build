@@ -52,11 +52,3 @@ install_subdir('Scripts', install_dir: get_option('installDir'))
 
 #meson symlink workaround, this kind of sucks as it won't be automatically removed on uninstall
 meson.add_install_script('ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name))
-# custom_target('chuckleSymlink',
-#   command : ['ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name)],
-#   install: true,
-#   install_dir: '/usr/local/bin')
-# r = run_command('ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name))
-# if r.returncode() != 0
-#   warning('Could not create symbolic link for chuckle in /usr/local/bin')
-# endif
