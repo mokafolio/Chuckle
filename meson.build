@@ -2,22 +2,14 @@ project('Chuckle', ['cpp', 'c'], default_options : ['cpp_std=c++14'])
 
 cc = meson.get_compiler('cpp')
 
-stickProj = subproject('Stick')
-lukeProj = subproject('Luke')
-crunchProj = subproject('Crunch')
-dabProj = subproject('Dab')
-paperProj = subproject('Paper2')
+chuckleCoreProj = subproject('ChuckleCore')
 stickLuaSolProj = subproject('StickLuaSol')
 crunchLuaSolProj = subproject('CrunchLuaSol')
 lukeLuaSolProj = subproject('LukeLuaSol')
 paperLuaSolProj = subproject('PaperLuaSol')
 dabLuaSolProj = subproject('DabLuaSol')
 
-deps = [stickProj.get_variable('stickDep'), 
-        crunchProj.get_variable('crunchDep'),
-        lukeProj.get_variable('lukeDep'), 
-        dabProj.get_variable('dabDep'),
-        paperProj.get_variable('paperDep'),
+deps = [chuckleCoreProj.get_variable('chuckleCoreDep'), 
         stickLuaSolProj.get_variable('stickLuaDep'),
         crunchLuaSolProj.get_variable('crunchLuaDep'),
         lukeLuaSolProj.get_variable('lukeLuaDep'),

@@ -1,10 +1,10 @@
 local util = {}
 
-util.randomTableEntry = function(_presetTable)
+util.randomEntry = function(_presetTable)
     return _presetTable[math.floor(random(1, #_presetTable + 1))]
 end
 
-util.randomTableEntryWithIndex = function(_presetTable)
+util.randomEntryWithIndex = function(_presetTable)
     local idx = math.floor(random(1, #_presetTable + 1))
     return _presetTable[idx], idx
 end
