@@ -4,6 +4,11 @@ util.randomEntry = function(_presetTable)
     return _presetTable[math.floor(random(1, #_presetTable + 1))]
 end
 
+util.randomEntryAndRemove = function(_presetTable)
+    local idx = math.floor(random(1, #_presetTable + 1))
+    return table.remove(_presetTable, idx)
+end
+
 util.randomEntryWithIndex = function(_presetTable)
     local idx = math.floor(random(1, #_presetTable + 1))
     return _presetTable[idx], idx

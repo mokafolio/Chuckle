@@ -5,6 +5,15 @@
 #include <PaperLuaSol/PaperLuaSol.hpp>
 #include <ChuckleCore/ChuckleCore.hpp>
 
+//@NOTE: for glReadPixels...this is only temporary i hope :)
+#include <Dab/Libs/GL/gl3w.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
+
 namespace sl = stickLuaSol;
 namespace cl = crunchLuaSol;
 namespace pl = paperLuaSol;

@@ -70,7 +70,6 @@ util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn)
 
     tbl.reverseInPlace(otherSidePos)
     _endFn(ret, last, otherSidePos[1], lastNormal)
-    ret:arcTo(otherSidePos[1], true)
 
     table.remove(otherSidePos, 1)
     for _, v in ipairs(otherSidePos) do
@@ -79,6 +78,7 @@ util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn)
     end
 
     _startFn(ret, last, first, firstNormal * -1)
+    ret:closePath()
 
     return ret
 end

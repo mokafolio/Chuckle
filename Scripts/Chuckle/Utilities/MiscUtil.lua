@@ -9,6 +9,12 @@ util.promote = function(_self, _toTable)
 end
 
 util.exitOnError = function(_err)
+    -- @TODO: just checking for it being a table seems rather weak...
+    -- wile that will work if we assume that the error tables are only 
+    -- returned from native functions returning usertypes on success, 
+    -- this should be more bullet proof.
+    -- 
+    -- possibly replace this with an alternative mechanism using luas pcall/error functions
     if _err and type(_err) == "table" then
         print("Error: ", _err.message)
         os.exit()
