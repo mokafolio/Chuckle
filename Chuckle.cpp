@@ -1,12 +1,6 @@
-#include <StickLuaSol/StickLuaSol.hpp>
-#include <CrunchLuaSol/CrunchLuaSol.hpp>
-#include <LukeLuaSol/LukeLuaSol.hpp>
-#include <DabLuaSol/DabLuaSol.hpp>
-#include <PaperLuaSol/PaperLuaSol.hpp> 
 #include <Stick/FileUtilities.hpp>
 #include <Stick/ArgumentParser.hpp>
-
-#include <Paper2/Group.hpp>
+#include <Chuckle/ChuckleLuaBindings.hpp>
 
 #define RETURN_ON_ERR(_err)                                                                        \
     if (_err)                                                                                      \
@@ -16,18 +10,10 @@
     }
 
 using namespace stick;
-namespace cl = crunchLuaSol;
-namespace pl = paperLuaSol;
-namespace ll = lukeLuaSol;
-namespace dl = dabLuaSol;
-
-Result<dab::RenderDevice*> fml()
-{
-    return Result<dab::RenderDevice*>();
-}
 
 int main(int _argc, const char * _args[])
 {
+    printf("FUCK\n"); asffas
     ArgumentParser parser("Chuckle");
     RETURN_ON_ERR(parser.addArgument("-s", "--script", 1, false));
     RETURN_ON_ERR(parser.parse(_args, _argc));
@@ -39,10 +25,8 @@ int main(int _argc, const char * _args[])
                        sol::lib::os,
                        sol::lib::math,
                        sol::lib::table);
-    ll::registerLuke(lua);
-    cl::registerCrunch(lua);
-    dl::registerDab(lua);
-    pl::registerPaper(lua);
+
+    chuckle::registerLuaBindings(lua);
 
     lua.script("package.path = package.path .. ';../Scripts/?.lua'");
     lua.set_function("testResult", []()
