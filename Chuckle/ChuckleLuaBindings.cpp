@@ -74,7 +74,9 @@ void registerLuaBindings(sol::state_view _lua)
             _self->setDrawFunction([_fn](Float64 _duration) { return _fn(_duration); });
         },
         "run",
-        &RenderWindow::run);
+        &RenderWindow::run,
+        "fps",
+        &RenderWindow::fps);
 
     globals.new_usertype<PaperWindow>(
         "PaperWindow",
