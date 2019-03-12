@@ -41,7 +41,6 @@ name = 'chuckle'
 bindir = join_paths(get_option('installDir'), 'bin')
 chuckle = executable(name, ['Chuckle/Chuckle.cpp', 
     'Chuckle/ChuckleLuaBindings.cpp',
-    'Submodules/cimgui/cimgui.cpp',
     'Chuckle/Libs/whereami/whereami.c'],
     dependencies: deps, 
     cpp_args:'-ftemplate-depth=10000', 
