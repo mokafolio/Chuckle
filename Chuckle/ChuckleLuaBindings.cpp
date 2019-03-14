@@ -32,7 +32,6 @@ void registerPathUtil(sol::table _table)
 
 void registerLuaBindings(sol::state_view _lua)
 {
-    printf("REGISTERING BIIITHC\n");
     // first register all existing lua bindings
     ll::registerLuke(_lua);
     cl::registerCrunch(_lua);
@@ -67,6 +66,9 @@ void registerLuaBindings(sol::state_view _lua)
                                                 "../Assets/RobotoMono-Regular.ttf").cString(),
                               14);
                       }),
+        "setShowWindowMetrics", &RenderWindow::setShowWindowMetrics,
+        "toggleShowWindowMetrics", &RenderWindow::toggleShowWindowMetrics,
+        "isShowingWindowMetrics", &RenderWindow::isShowingWindowMetrics,
         "frameImage",
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &
