@@ -59,6 +59,14 @@ void registerLuaBindings(sol::state_view _lua)
                 return sol::make_object(L, err);
             return sol::make_object(L, std::move(wnd));
         }),
+        "enableDefaultUI",
+        sol::overload(&RenderWindow::enableDefaultUI,
+                      [](RenderWindow * _self) {
+                          return _self->enableDefaultUI(
+                              stick::path::join(executableDirectoryName(),
+                                                "../Assets/RobotoMono-Regular.ttf").cString(),
+                              14);
+                      }),
         "frameImage",
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &

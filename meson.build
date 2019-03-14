@@ -31,7 +31,7 @@ endif
 
 deps += luaDep
 
-incDirs = include_directories('.', 'Chuckle/Libs', 'Chuckle/Libs/whereami')
+incDirs = include_directories('.')
 
 if host_machine.system() == 'linux'
     deps += cc.find_library('dl', required : true)
@@ -41,7 +41,7 @@ name = 'chuckle'
 bindir = join_paths(get_option('installDir'), 'bin')
 chuckle = executable(name, ['Chuckle/Chuckle.cpp', 
     'Chuckle/ChuckleLuaBindings.cpp',
-    'Chuckle/Libs/whereami/whereami.c'],
+    'Chuckle/ImGuiLuaBindings.cpp'],
     dependencies: deps, 
     cpp_args:'-ftemplate-depth=10000', 
     include_directories: incDirs,
@@ -49,6 +49,7 @@ chuckle = executable(name, ['Chuckle/Chuckle.cpp',
     install_dir: bindir)
 
 install_subdir('Scripts', install_dir: get_option('installDir'))
+install_subdir('Assets', install_dir: get_option('installDir'))
 
 #meson symlink workaround, this kind of sucks as it won't be automatically removed on uninstall
 meson.add_install_script('ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name))

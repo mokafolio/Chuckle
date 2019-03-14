@@ -2,9 +2,11 @@
 #include <Stick/FileUtilities.hpp>
 #include <Stick/Path.hpp>
 
+#include <ChuckleCore/ChuckleCore.hpp>
 #include <Chuckle/ChuckleLuaBindings.hpp>
+#include <Chuckle/ImGuiLuaBindings.hpp>
 
-#include <whereami.h>
+// #include <whereami.h>
 
 #define RETURN_ON_ERR(_err)                                                                        \
     if (_err)                                                                                      \
@@ -15,14 +17,14 @@
 
 using namespace stick;
 
-static String executablePath()
-{
-    int length = wai_getExecutablePath(NULL, 0, NULL);
-    String ret;
-    ret.resize(length);
-    wai_getExecutablePath((char *)ret.ptr(), length, NULL);
-    return ret;
-}
+// static String executablePath()
+// {
+//     int length = wai_getExecutablePath(NULL, 0, NULL);
+//     String ret;
+//     ret.resize(length);
+//     wai_getExecutablePath((char *)ret.ptr(), length, NULL);
+//     return ret;
+// }
 
 int main(int _argc, const char * _args[])
 {
@@ -38,9 +40,9 @@ int main(int _argc, const char * _args[])
                        sol::lib::math,
                        sol::lib::table);
     chuckle::registerLuaBindings(lua);
+    chuckle::registerImGuiBindings(lua);
 
-    String exePath = executablePath();
-    String dirName = path::directoryName(exePath);
+    String dirName = chuckle::executableDirectoryName();
     String packagePath("package.path = package.path .. ';");
     packagePath.append(dirName);
     packagePath.append("/../Scripts/?.lua;");
