@@ -32,6 +32,7 @@ void registerPathUtil(sol::table _table)
 
 void registerLuaBindings(sol::state_view _lua)
 {
+    printf("REGISTERING BIIITHC\n");
     // first register all existing lua bindings
     ll::registerLuke(_lua);
     cl::registerCrunch(_lua);
@@ -45,22 +46,10 @@ void registerLuaBindings(sol::state_view _lua)
     sol::table chuckle = sl::ensureNamespaceTable(_lua, globals, "__chuckle");
     chuckle.set_function("registerPathUtil", registerPathUtil);
 
-    globals.new_usertype<ImGuiInterface>(
-        "ImGuiInterface",
-        sol::base_classes,
-        sol::bases<stick::EventForwarder>(),
-        "new",
-        sol::no_constructor, //can't be directly constructed for now
-        "newFrame",
-        &ImGuiInterface::newFrame,
-        "finalizeFrame",
-        &ImGuiInterface::finalizeFrame
-    );
-
     globals.new_usertype<RenderWindow>(
         "RenderWindow",
         sol::base_classes,
-        sol::bases<luke::Window, stick::EventForwarder>(),
+        sol::bases<luke::Window>(),
         sol::call_constructor,
         sol::factories([](const WindowSettings & _settings, sol::this_state _s) {
             sol::state_view L(_s);
@@ -70,18 +59,6 @@ void registerLuaBindings(sol::state_view _lua)
                 return sol::make_object(L, err);
             return sol::make_object(L, std::move(wnd));
         }),
-        "enableDefaultUI",
-        sol::overload(&RenderWindow::enableDefaultUI,
-                      [](RenderWindow * _self) {
-                          return _self->enableDefaultUI(
-                              stick::path::join(executableDirectoryName(),
-                                                "../Assets/RobotoMono-Regular.ttf").cString(),
-                              14);
-                      }),
-        "setShowWindowMetrics", &RenderWindow::setShowWindowMetrics,
-        "toggleShowWindowMetrics", &RenderWindow::toggleShowWindowMetrics,
-        "isShowingWindowMetrics", &RenderWindow::isShowingWindowMetrics,
-        "imGuiInterface", &RenderWindow::imGuiInterface,
         "frameImage",
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &
@@ -94,17 +71,15 @@ void registerLuaBindings(sol::state_view _lua)
         &RenderWindow::renderDevice,
         "setDrawFunction",
         [](RenderWindow * _self, sol::function _fn) {
-            _self->setDrawFunction([_fn](Float64 _duration) { return _fn(_duration); });
+            _self->setDrawFunction([_fn]() { return _fn(); });
         },
         "run",
-        &RenderWindow::run,
-        "fps",
-        &RenderWindow::fps);
+        &RenderWindow::run);
 
     globals.new_usertype<PaperWindow>(
         "PaperWindow",
         sol::base_classes,
-        sol::bases<RenderWindow, luke::Window, stick::EventForwarder>(),
+        sol::bases<RenderWindow>(),
         sol::call_constructor,
         sol::factories([](const WindowSettings & _settings, sol::this_state _s) {
             sol::state_view L(_s);
@@ -115,7 +90,7 @@ void registerLuaBindings(sol::state_view _lua)
             return sol::make_object(L, std::move(wnd));
         }),
         "document",
-        &PaperWindow::document,
+        &PaperWindow::renderDevice,
         "paperRenderer",
         &PaperWindow::paperRenderer,
         "drawDocument",

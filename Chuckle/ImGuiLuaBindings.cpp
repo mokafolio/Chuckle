@@ -7,7 +7,7 @@
 
 namespace chuckle
 {
-    using namespace stick;
+using namespace stick;
 
 void registerImGuiBindings(sol::state_view _lua)
 {
@@ -15,6 +15,731 @@ void registerImGuiBindings(sol::state_view _lua)
     sol::table globals = _lua.globals();
     sol::table imgui = _lua.create_table();
     globals["gui"] = imgui;
+
+    imgui.new_enum("DrawCornerFlags", 
+        "TopLeft",
+        1 << 0,
+        "TopRight",
+        1 << 1,
+        "BotLeft",
+        1 << 2,
+        "BotRight",
+        1 << 3,
+        "Top",
+        ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_TopRight,
+        "Bot",
+        ImDrawCornerFlags_BotLeft | ImDrawCornerFlags_BotRight,
+        "Left",
+        ImDrawCornerFlags_TopLeft | ImDrawCornerFlags_BotLeft,
+        "Right",
+        ImDrawCornerFlags_TopRight | ImDrawCornerFlags_BotRight,
+        "All",
+        0xF
+    );
+
+    imgui.new_enum("DrawListFlags", 
+        "None",
+        0,
+        "AntiAliasedLines",
+        1 << 0,
+        "AntiAliasedFill",
+        1 << 1
+    );
+
+    imgui.new_enum("FontAtlasFlags", 
+        "None",
+        0,
+        "NoPowerOfTwoHeight",
+        1 << 0,
+        "NoMouseCursors",
+        1 << 1
+    );
+
+    imgui.new_enum("BackendFlags", 
+        "None",
+        0,
+        "HasGamepad",
+        1 << 0,
+        "HasMouseCursors",
+        1 << 1,
+        "HasSetMousePos",
+        1 << 2
+    );
+
+    imgui.new_enum("Col", 
+        "Text",
+        0,
+        "TextDisabled",
+        1,
+        "WindowBg",
+        2,
+        "ChildBg",
+        3,
+        "PopupBg",
+        4,
+        "Border",
+        5,
+        "BorderShadow",
+        6,
+        "FrameBg",
+        7,
+        "FrameBgHovered",
+        8,
+        "FrameBgActive",
+        9,
+        "TitleBg",
+        10,
+        "TitleBgActive",
+        11,
+        "TitleBgCollapsed",
+        12,
+        "MenuBarBg",
+        13,
+        "ScrollbarBg",
+        14,
+        "ScrollbarGrab",
+        15,
+        "ScrollbarGrabHovered",
+        16,
+        "ScrollbarGrabActive",
+        17,
+        "CheckMark",
+        18,
+        "SliderGrab",
+        19,
+        "SliderGrabActive",
+        20,
+        "Button",
+        21,
+        "ButtonHovered",
+        22,
+        "ButtonActive",
+        23,
+        "Header",
+        24,
+        "HeaderHovered",
+        25,
+        "HeaderActive",
+        26,
+        "Separator",
+        27,
+        "SeparatorHovered",
+        28,
+        "SeparatorActive",
+        29,
+        "ResizeGrip",
+        30,
+        "ResizeGripHovered",
+        31,
+        "ResizeGripActive",
+        32,
+        "Tab",
+        33,
+        "TabHovered",
+        34,
+        "TabActive",
+        35,
+        "TabUnfocused",
+        36,
+        "TabUnfocusedActive",
+        37,
+        "PlotLines",
+        38,
+        "PlotLinesHovered",
+        39,
+        "PlotHistogram",
+        40,
+        "PlotHistogramHovered",
+        41,
+        "TextSelectedBg",
+        42,
+        "DragDropTarget",
+        43,
+        "NavHighlight",
+        44,
+        "NavWindowingHighlight",
+        45,
+        "NavWindowingDimBg",
+        46,
+        "ModalWindowDimBg",
+        47,
+        "COUNT",
+        48
+    );
+
+    imgui.new_enum("ColorEditFlags", 
+        "None",
+        0,
+        "NoAlpha",
+        1 << 1,
+        "NoPicker",
+        1 << 2,
+        "NoOptions",
+        1 << 3,
+        "NoSmallPreview",
+        1 << 4,
+        "NoInputs",
+        1 << 5,
+        "NoTooltip",
+        1 << 6,
+        "NoLabel",
+        1 << 7,
+        "NoSidePreview",
+        1 << 8,
+        "NoDragDrop",
+        1 << 9,
+        "AlphaBar",
+        1 << 16,
+        "AlphaPreview",
+        1 << 17,
+        "AlphaPreviewHalf",
+        1 << 18,
+        "HDR",
+        1 << 19,
+        "RGB",
+        1 << 20,
+        "HSV",
+        1 << 21,
+        "HEX",
+        1 << 22,
+        "Uint8",
+        1 << 23,
+        "Float",
+        1 << 24,
+        "PickerHueBar",
+        1 << 25,
+        "PickerHueWheel",
+        1 << 26,
+        "_InputsMask",
+        ImGuiColorEditFlags_RGB|ImGuiColorEditFlags_HSV|ImGuiColorEditFlags_HEX,
+        "_DataTypeMask",
+        ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_Float,
+        "_PickerMask",
+        ImGuiColorEditFlags_PickerHueWheel|ImGuiColorEditFlags_PickerHueBar,
+        "_OptionsDefault",
+        ImGuiColorEditFlags_Uint8|ImGuiColorEditFlags_RGB|ImGuiColorEditFlags_PickerHueBar
+    );
+
+    imgui.new_enum("ComboFlags", 
+        "None",
+        0,
+        "PopupAlignLeft",
+        1 << 0,
+        "HeightSmall",
+        1 << 1,
+        "HeightRegular",
+        1 << 2,
+        "HeightLarge",
+        1 << 3,
+        "HeightLargest",
+        1 << 4,
+        "NoArrowButton",
+        1 << 5,
+        "NoPreview",
+        1 << 6,
+        "HeightMask_",
+        ImGuiComboFlags_HeightSmall | ImGuiComboFlags_HeightRegular | ImGuiComboFlags_HeightLarge | ImGuiComboFlags_HeightLargest
+    );
+
+    imgui.new_enum("Cond", 
+        "Always",
+        1 << 0,
+        "Once",
+        1 << 1,
+        "FirstUseEver",
+        1 << 2,
+        "Appearing",
+        1 << 3
+    );
+
+    imgui.new_enum("ConfigFlags", 
+        "None",
+        0,
+        "NavEnableKeyboard",
+        1 << 0,
+        "NavEnableGamepad",
+        1 << 1,
+        "NavEnableSetMousePos",
+        1 << 2,
+        "NavNoCaptureKeyboard",
+        1 << 3,
+        "NoMouse",
+        1 << 4,
+        "NoMouseCursorChange",
+        1 << 5,
+        "IsSRGB",
+        1 << 20,
+        "IsTouchScreen",
+        1 << 21
+    );
+
+    imgui.new_enum("DataType", 
+        "S32",
+        0,
+        "U32",
+        1,
+        "S64",
+        2,
+        "U64",
+        3,
+        "Float",
+        4,
+        "Double",
+        5,
+        "COUNT",
+        6
+    );
+
+    imgui.new_enum("Dir", 
+        "None",
+        -1,
+        "Left",
+        0,
+        "Right",
+        1,
+        "Up",
+        2,
+        "Down",
+        3,
+        "COUNT",
+        4
+    );
+
+    imgui.new_enum("DragDropFlags", 
+        "None",
+        0,
+        "SourceNoPreviewTooltip",
+        1 << 0,
+        "SourceNoDisableHover",
+        1 << 1,
+        "SourceNoHoldToOpenOthers",
+        1 << 2,
+        "SourceAllowNullID",
+        1 << 3,
+        "SourceExtern",
+        1 << 4,
+        "SourceAutoExpirePayload",
+        1 << 5,
+        "AcceptBeforeDelivery",
+        1 << 10,
+        "AcceptNoDrawDefaultRect",
+        1 << 11,
+        "AcceptNoPreviewTooltip",
+        1 << 12,
+        "AcceptPeekOnly",
+        ImGuiDragDropFlags_AcceptBeforeDelivery | ImGuiDragDropFlags_AcceptNoDrawDefaultRect
+    );
+
+    imgui.new_enum("FocusedFlags", 
+        "None",
+        0,
+        "ChildWindows",
+        1 << 0,
+        "RootWindow",
+        1 << 1,
+        "AnyWindow",
+        1 << 2,
+        "RootAndChildWindows",
+        ImGuiFocusedFlags_RootWindow | ImGuiFocusedFlags_ChildWindows
+    );
+
+    imgui.new_enum("HoveredFlags", 
+        "None",
+        0,
+        "ChildWindows",
+        1 << 0,
+        "RootWindow",
+        1 << 1,
+        "AnyWindow",
+        1 << 2,
+        "AllowWhenBlockedByPopup",
+        1 << 3,
+        "AllowWhenBlockedByActiveItem",
+        1 << 5,
+        "AllowWhenOverlapped",
+        1 << 6,
+        "AllowWhenDisabled",
+        1 << 7,
+        "RectOnly",
+        ImGuiHoveredFlags_AllowWhenBlockedByPopup | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem | ImGuiHoveredFlags_AllowWhenOverlapped,
+        "RootAndChildWindows",
+        ImGuiHoveredFlags_RootWindow | ImGuiHoveredFlags_ChildWindows
+    );
+
+    imgui.new_enum("InputTextFlags", 
+        "None",
+        0,
+        "CharsDecimal",
+        1 << 0,
+        "CharsHexadecimal",
+        1 << 1,
+        "CharsUppercase",
+        1 << 2,
+        "CharsNoBlank",
+        1 << 3,
+        "AutoSelectAll",
+        1 << 4,
+        "EnterReturnsTrue",
+        1 << 5,
+        "CallbackCompletion",
+        1 << 6,
+        "CallbackHistory",
+        1 << 7,
+        "CallbackAlways",
+        1 << 8,
+        "CallbackCharFilter",
+        1 << 9,
+        "AllowTabInput",
+        1 << 10,
+        "CtrlEnterForNewLine",
+        1 << 11,
+        "NoHorizontalScroll",
+        1 << 12,
+        "AlwaysInsertMode",
+        1 << 13,
+        "ReadOnly",
+        1 << 14,
+        "Password",
+        1 << 15,
+        "NoUndoRedo",
+        1 << 16,
+        "CharsScientific",
+        1 << 17,
+        "CallbackResize",
+        1 << 18,
+        "Multiline",
+        1 << 20
+    );
+
+    imgui.new_enum("Key", 
+        "Tab",
+        0,
+        "LeftArrow",
+        1,
+        "RightArrow",
+        2,
+        "UpArrow",
+        3,
+        "DownArrow",
+        4,
+        "PageUp",
+        5,
+        "PageDown",
+        6,
+        "Home",
+        7,
+        "End",
+        8,
+        "Insert",
+        9,
+        "Delete",
+        10,
+        "Backspace",
+        11,
+        "Space",
+        12,
+        "Enter",
+        13,
+        "Escape",
+        14,
+        "A",
+        15,
+        "C",
+        16,
+        "V",
+        17,
+        "X",
+        18,
+        "Y",
+        19,
+        "Z",
+        20,
+        "COUNT",
+        21
+    );
+
+    imgui.new_enum("MouseCursor", 
+        "None",
+        -1,
+        "Arrow",
+        0,
+        "TextInput",
+        1,
+        "ResizeAll",
+        2,
+        "ResizeNS",
+        3,
+        "ResizeEW",
+        4,
+        "ResizeNESW",
+        5,
+        "ResizeNWSE",
+        6,
+        "Hand",
+        7,
+        "COUNT",
+        8
+    );
+
+    imgui.new_enum("NavInput", 
+        "Activate",
+        0,
+        "Cancel",
+        1,
+        "Input",
+        2,
+        "Menu",
+        3,
+        "DpadLeft",
+        4,
+        "DpadRight",
+        5,
+        "DpadUp",
+        6,
+        "DpadDown",
+        7,
+        "LStickLeft",
+        8,
+        "LStickRight",
+        9,
+        "LStickUp",
+        10,
+        "LStickDown",
+        11,
+        "FocusPrev",
+        12,
+        "FocusNext",
+        13,
+        "TweakSlow",
+        14,
+        "TweakFast",
+        15,
+        "KeyMenu_",
+        16,
+        "KeyLeft_",
+        17,
+        "KeyRight_",
+        18,
+        "KeyUp_",
+        19,
+        "KeyDown_",
+        20,
+        "COUNT",
+        21,
+        "InternalStart_",
+        ImGuiNavInput_KeyMenu_
+    );
+
+    imgui.new_enum("SelectableFlags", 
+        "None",
+        0,
+        "DontClosePopups",
+        1 << 0,
+        "SpanAllColumns",
+        1 << 1,
+        "AllowDoubleClick",
+        1 << 2,
+        "Disabled",
+        1 << 3
+    );
+
+    imgui.new_enum("StyleVar", 
+        "Alpha",
+        0,
+        "WindowPadding",
+        1,
+        "WindowRounding",
+        2,
+        "WindowBorderSize",
+        3,
+        "WindowMinSize",
+        4,
+        "WindowTitleAlign",
+        5,
+        "ChildRounding",
+        6,
+        "ChildBorderSize",
+        7,
+        "PopupRounding",
+        8,
+        "PopupBorderSize",
+        9,
+        "FramePadding",
+        10,
+        "FrameRounding",
+        11,
+        "FrameBorderSize",
+        12,
+        "ItemSpacing",
+        13,
+        "ItemInnerSpacing",
+        14,
+        "IndentSpacing",
+        15,
+        "ScrollbarSize",
+        16,
+        "ScrollbarRounding",
+        17,
+        "GrabMinSize",
+        18,
+        "GrabRounding",
+        19,
+        "TabRounding",
+        20,
+        "ButtonTextAlign",
+        21,
+        "SelectableTextAlign",
+        22,
+        "COUNT",
+        23
+    );
+
+    imgui.new_enum("TabBarFlags", 
+        "None",
+        0,
+        "Reorderable",
+        1 << 0,
+        "AutoSelectNewTabs",
+        1 << 1,
+        "TabListPopupButton",
+        1 << 2,
+        "NoCloseWithMiddleMouseButton",
+        1 << 3,
+        "NoTabListScrollingButtons",
+        1 << 4,
+        "NoTooltip",
+        1 << 5,
+        "FittingPolicyResizeDown",
+        1 << 6,
+        "FittingPolicyScroll",
+        1 << 7,
+        "FittingPolicyMask_",
+        ImGuiTabBarFlags_FittingPolicyResizeDown | ImGuiTabBarFlags_FittingPolicyScroll,
+        "FittingPolicyDefault_",
+        ImGuiTabBarFlags_FittingPolicyResizeDown
+    );
+
+    imgui.new_enum("TabItemFlags", 
+        "None",
+        0,
+        "UnsavedDocument",
+        1 << 0,
+        "SetSelected",
+        1 << 1,
+        "NoCloseWithMiddleMouseButton",
+        1 << 2,
+        "NoPushId",
+        1 << 3
+    );
+
+    imgui.new_enum("TreeNodeFlags", 
+        "None",
+        0,
+        "Selected",
+        1 << 0,
+        "Framed",
+        1 << 1,
+        "AllowItemOverlap",
+        1 << 2,
+        "NoTreePushOnOpen",
+        1 << 3,
+        "NoAutoOpenOnLog",
+        1 << 4,
+        "DefaultOpen",
+        1 << 5,
+        "OpenOnDoubleClick",
+        1 << 6,
+        "OpenOnArrow",
+        1 << 7,
+        "Leaf",
+        1 << 8,
+        "Bullet",
+        1 << 9,
+        "FramePadding",
+        1 << 10,
+        "NavLeftJumpsBackHere",
+        1 << 13,
+        "CollapsingHeader",
+        ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_NoAutoOpenOnLog
+    );
+
+    imgui.new_enum("WindowFlags", 
+        "None",
+        0,
+        "NoTitleBar",
+        1 << 0,
+        "NoResize",
+        1 << 1,
+        "NoMove",
+        1 << 2,
+        "NoScrollbar",
+        1 << 3,
+        "NoScrollWithMouse",
+        1 << 4,
+        "NoCollapse",
+        1 << 5,
+        "AlwaysAutoResize",
+        1 << 6,
+        "NoBackground",
+        1 << 7,
+        "NoSavedSettings",
+        1 << 8,
+        "NoMouseInputs",
+        1 << 9,
+        "MenuBar",
+        1 << 10,
+        "HorizontalScrollbar",
+        1 << 11,
+        "NoFocusOnAppearing",
+        1 << 12,
+        "NoBringToFrontOnFocus",
+        1 << 13,
+        "AlwaysVerticalScrollbar",
+        1 << 14,
+        "AlwaysHorizontalScrollbar",
+        1<< 15,
+        "AlwaysUseWindowPadding",
+        1 << 16,
+        "NoNavInputs",
+        1 << 18,
+        "NoNavFocus",
+        1 << 19,
+        "UnsavedDocument",
+        1 << 20,
+        "NoNav",
+        ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
+        "NoDecoration",
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse,
+        "NoInputs",
+        ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus,
+        "NavFlattened",
+        1 << 23,
+        "ChildWindow",
+        1 << 24,
+        "Tooltip",
+        1 << 25,
+        "Popup",
+        1 << 26,
+        "Modal",
+        1 << 27,
+        "ChildMenu",
+        1 << 28
+    );
+
+    //@TODO: Put a lot more stuff in here
+    imgui.new_usertype<ImGuiIO>("IO",
+                                "new",
+                                sol::no_constructor,
+                                "configFlags",
+                                &ImGuiIO::ConfigFlags,
+                                "backendFlags",
+                                &ImGuiIO::BackendFlags,
+                                "displaySize",
+                                &ImGuiIO::DisplaySize,
+                                "deltaTime",
+                                &ImGuiIO::DeltaTime,
+                                "iniSavingRate",
+                                &ImGuiIO::IniSavingRate);
 
     imgui["createContext"] = []() { return ImGui::CreateContext(); };
     imgui["destroyContext"] =
@@ -59,9 +784,9 @@ void registerImGuiBindings(sol::state_view _lua)
         sol::overload(ImGui::StyleColorsLight, []() { ImGui::StyleColorsLight(); });
 
     imgui["beginWindow"] = sol::overload([](const char * _str) { return ImGui::Begin(_str); },
-                                   [](const char * _str, ImGuiWindowFlags _flags) {
-                                       return ImGui::Begin(_str, NULL, _flags);
-                                   });
+                                         [](const char * _str, ImGuiWindowFlags _flags) {
+                                             return ImGui::Begin(_str, NULL, _flags);
+                                         });
     imgui["beginWindowClosable"] = sol::overload(
         [](const char * _str, sol::function _cb) {
             bool bOpen = true;
@@ -605,5 +1330,78 @@ void registerImGuiBindings(sol::state_view _lua)
                       [](const char * _label, const char * _shortcut, bool _selected) {
                           return ImGui::MenuItem(_label, _shortcut, _selected);
                       });
+
+    imgui["beginTooltip"] = ImGui::BeginTooltip;
+    imgui["endTooltip"] = ImGui::EndTooltip;
+    imgui["setTooltip"] = [](const char * _txt) { ImGui::SetTooltip("%s", _txt); };
+
+    imgui["openPopup"] = ImGui::OpenPopup;
+    imgui["beginPopup"] =
+        sol::overload(ImGui::BeginPopup, [](const char * _str) { return ImGui::BeginPopup(_str); });
+    imgui["beginPopupContextItem"] =
+        sol::overload(ImGui::BeginPopupContextItem,
+                      [](const char * _str) { return ImGui::BeginPopupContextItem(_str); },
+                      []() { return ImGui::BeginPopupContextItem(); }),
+    imgui["beginPopupContextWindow"] =
+        sol::overload(ImGui::BeginPopupContextWindow,
+                      [](const char * _str) { return ImGui::BeginPopupContextWindow(_str); },
+                      [](const char * _str, int _mouse_button) {
+                          return ImGui::BeginPopupContextWindow(_str, _mouse_button);
+                      },
+                      []() { return ImGui::BeginPopupContextWindow(); }),
+    imgui["beginPopupContextVoid"] =
+        sol::overload(ImGui::BeginPopupContextVoid,
+                      [](const char * _str) { return ImGui::BeginPopupContextVoid(_str); },
+                      []() { return ImGui::BeginPopupContextVoid(); }),
+    imgui["beginPopupModal"] = sol::overload(
+        [](const char * _name, sol::function _cb) {
+            bool bOpen = true;
+            if (ImGui::BeginPopupModal(_name, &bOpen))
+                _cb(bOpen);
+        },
+        [](const char * _name, ImGuiWindowFlags _flags, sol::function _cb) {
+            bool bOpen = true;
+            if (ImGui::BeginPopupModal(_name, &bOpen, _flags))
+                _cb(bOpen);
+        }),
+    imgui["endPopup"] = ImGui::EndPopup;
+    imgui["openPopupOnItemClick"] =
+        sol::overload(ImGui::OpenPopupOnItemClick,
+                      [](const char * _name) { return ImGui::OpenPopupOnItemClick(_name); });
+    imgui["isPopupOpen"] = (bool (*)(const char *))ImGui::IsPopupOpen;
+    imgui["closeCurrentPopup"] = ImGui::CloseCurrentPopup;
+
+    imgui["columns"] = sol::overload(ImGui::Columns,
+                                     [](int _c) { ImGui::Columns(_c); },
+                                     [](int _c, const char * _id) { ImGui::Columns(_c, _id); });
+    imgui["nextColumn"] = ImGui::NextColumn;
+    imgui["endPopup"] = ImGui::EndPopup;
+    imgui["getColumnIndex"] = ImGui::GetColumnIndex;
+    imgui["getColumnWidth"] =
+        sol::overload(ImGui::GetColumnWidth, []() { return ImGui::GetColumnWidth(); });
+    imgui["setColumnWidth"] = ImGui::SetColumnWidth;
+    imgui["getColumnOffset"] =
+        sol::overload(ImGui::GetColumnOffset, []() { return ImGui::GetColumnOffset(); });
+    imgui["setColumnOffset"] = ImGui::SetColumnOffset;
+    imgui["getColumnsCount"] = ImGui::GetColumnsCount;
+
+    imgui["beginTabBar"] =
+        sol::overload(ImGui::BeginTabBar, [](const char * _id) { return ImGui::BeginTabBar(_id); });
+    imgui["endTabBar"] = ImGui::EndTabBar;
+    imgui["beginTabItem"] = sol::overload(
+        [](const char * _name, sol::function _cb) {
+            bool bOpen = true;
+            if (ImGui::BeginTabItem(_name, &bOpen))
+                _cb(bOpen);
+        },
+        [](const char * _name, ImGuiTabItemFlags _flags, sol::function _cb) {
+            bool bOpen = true;
+            if (ImGui::BeginTabItem(_name, &bOpen, _flags))
+                _cb(bOpen);
+        });
+    imgui["endTabItem"] = ImGui::EndTabItem;
+    imgui["setTabItemClosed"] = ImGui::SetTabItemClosed;
+
+    //@TODO: bind at least some of the imgui utility functions
 }
 } // namespace chuckle

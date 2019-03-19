@@ -16,6 +16,14 @@ util.mix = function(_a, _b, _fact)
     return _a + (_b - _a) * _fact
 end
 
+util.randomPosition = function(_a, _b, _c, _d)
+    if _c == nil then
+        return Vec2(random(0, _a), random(0, _b))
+    else
+        return Vec2(random(_a, _c), random(_b, _d))
+    end
+end
+
 util.sortClockwise = function(_points)
     local center = Vec2(0)
     for k,v in ipairs(_points) do

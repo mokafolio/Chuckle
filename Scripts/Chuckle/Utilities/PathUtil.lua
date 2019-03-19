@@ -35,8 +35,9 @@ util.arcify = function(_path, _sampleDist, _bClockwise)
     return ret
 end
 
-util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn)
-    local ret = _path:document():createPath()
+util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn, _pathCreateFn)
+    _pathCreateFn = _pathCreateFn and _pathCreateFn or function() return _path:document():createPath() end
+    local ret = _pathCreateFn()
     local len = _path:length()
     local off = 0
     local otherSidePos = {}
@@ -69,7 +70,9 @@ util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn)
     end
 
     tbl.reverseInPlace(otherSidePos)
-    _endFn(ret, last, otherSidePos[1], lastNormal)
+    if _endFn then
+        _endFn(ret, last, otherSidePos[1], lastNormal)
+    end
 
     table.remove(otherSidePos, 1)
     for _, v in ipairs(otherSidePos) do
@@ -77,7 +80,9 @@ util.tubify = function(_path, _sampleDist, _radiusFn, _startFn, _endFn)
         last = v
     end
 
-    _startFn(ret, last, first, firstNormal * -1)
+    if _startFn then
+        _startFn(ret, last, first, firstNormal * -1)
+    end
     ret:closePath()
 
     return ret
