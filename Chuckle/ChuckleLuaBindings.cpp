@@ -30,6 +30,38 @@ void registerPathUtil(sol::table _table)
     _table.set_function("morph", path::morph);
 }
 
+namespace detail
+{
+void _tableToVec2fData(sol::table _table, DynamicArray<Vec2f> & _outData)
+{
+    _outData.reserve(_table.size());
+    for (auto & kv : _table)
+    {
+        if (kv.second.is<Vec2f>())
+        {
+            _outData.append(kv.second.as<Vec2f>());
+        }
+        else if (kv.second.is<sol::table>())
+        {
+            sol::table tbl = kv.second.as<sol::table>();
+            STICK_ASSERT(tbl.size() == 2);
+            _outData.append(Vec2f(tbl[1], tbl[2]));
+        }
+    }
+}
+
+template <class ItemT>
+void _tableToPaperItems(sol::table _table, DynamicArray<ItemT *> & _outData)
+{
+    _outData.reserve(_table.size());
+    for (auto & kv : _table)
+    {
+        STICK_ASSERT(kv.second.is<ItemT *>());
+        _outData.append(kv.second.as<ItemT *>());
+    }
+}
+} // namespace detail
+
 void registerLuaBindings(sol::state_view _lua)
 {
     // first register all existing lua bindings
@@ -50,12 +82,87 @@ void registerLuaBindings(sol::state_view _lua)
         sol::base_classes,
         sol::bases<stick::EventForwarder>(),
         "new",
-        sol::no_constructor, //can't be directly constructed for now
+        sol::no_constructor, // can't be directly constructed for now
         "newFrame",
         &ImGuiInterface::newFrame,
         "finalizeFrame",
-        &ImGuiInterface::finalizeFrame
-    );
+        &ImGuiInterface::finalizeFrame);
+
+    globals.new_usertype<QuickDraw>(
+        "QuickDraw",
+        "new",
+        sol::no_constructor, // can't be directly constructed for now
+        "setViewport",
+        &QuickDraw::setViewport,
+        "setTransform",
+        sol::overload((void (QuickDraw::*)(const Mat32f &)) & QuickDraw::setTransform,
+                      (void (QuickDraw::*)(const Mat4f &)) & QuickDraw::setTransform),
+        "setProjection",
+        sol::overload((void (QuickDraw::*)(const Mat32f &)) & QuickDraw::setProjection,
+                      (void (QuickDraw::*)(const Mat4f &)) & QuickDraw::setProjection),
+        "pushTransform",
+        &QuickDraw::pushTransform,
+        "popTransform",
+        &QuickDraw::popTransform,
+        "pushProjection",
+        &QuickDraw::pushProjection,
+        "popProjection",
+        &QuickDraw::popProjection,
+        "applyTransform",
+        sol::overload((void (QuickDraw::*)(const Mat32f &)) & QuickDraw::applyTransform,
+                      (void (QuickDraw::*)(const Mat4f &)) & QuickDraw::applyTransform),
+        "setColor",
+        &QuickDraw::setColor,
+        "transform",
+        &QuickDraw::transform,
+        "projection",
+        &QuickDraw::projection,
+        "transformProjection",
+        &QuickDraw::transformProjection,
+        "addToPass",
+        &QuickDraw::addToPass,
+        "flush",
+        &QuickDraw::flush,
+        "rect",
+        &QuickDraw::rect,
+        "lineRect",
+        &QuickDraw::lineRect,
+        "lines",
+        [](QuickDraw * _self, sol::table _table) {
+            stick::DynamicArray<Vec2f> data;
+            detail::_tableToVec2fData(_table, data);
+            _self->lines(&data[0], data.count());
+        },
+        "lineStrip",
+        sol::overload(
+            [](QuickDraw * _self, sol::table _table) {
+                stick::DynamicArray<Vec2f> data;
+                detail::_tableToVec2fData(_table, data);
+                _self->lineStrip(&data[0], data.count());
+            },
+            [](QuickDraw * _self, sol::table _table, bool _bClose) {
+                stick::DynamicArray<Vec2f> data;
+                detail::_tableToVec2fData(_table, data);
+                _self->lineStrip(&data[0], data.count(), _bClose);
+            }),
+        "points",
+        [](QuickDraw * _self, sol::table _table) {
+            stick::DynamicArray<Vec2f> data;
+            detail::_tableToVec2fData(_table, data);
+            _self->points(&data[0], data.count());
+        },
+        "rects",
+        [](QuickDraw * _self, sol::table _table, Float32 _radius) {
+            stick::DynamicArray<Vec2f> data;
+            detail::_tableToVec2fData(_table, data);
+            _self->rects(&data[0], data.count(), _radius);
+        },
+        "lineRects",
+        [](QuickDraw * _self, sol::table _table, Float32 _radius) {
+            stick::DynamicArray<Vec2f> data;
+            detail::_tableToVec2fData(_table, data);
+            _self->lineRects(&data[0], data.count(), _radius);
+        });
 
     globals.new_usertype<RenderWindow>(
         "RenderWindow",
@@ -75,13 +182,20 @@ void registerLuaBindings(sol::state_view _lua)
                       [](RenderWindow * _self) {
                           return _self->enableDefaultUI(
                               stick::path::join(executableDirectoryName(),
-                                                "../Assets/RobotoMono-Regular.ttf").cString(),
+                                                "../Assets/RobotoMono-Regular.ttf")
+                                  .cString(),
                               14);
                       }),
-        "setShowWindowMetrics", &RenderWindow::setShowWindowMetrics,
-        "toggleShowWindowMetrics", &RenderWindow::toggleShowWindowMetrics,
-        "isShowingWindowMetrics", &RenderWindow::isShowingWindowMetrics,
-        "imGuiInterface", &RenderWindow::imGuiInterface,
+        "setShowWindowMetrics",
+        &RenderWindow::setShowWindowMetrics,
+        "toggleShowWindowMetrics",
+        &RenderWindow::toggleShowWindowMetrics,
+        "isShowingWindowMetrics",
+        &RenderWindow::isShowingWindowMetrics,
+        "imGuiInterface",
+        &RenderWindow::imGuiInterface,
+        "quickDraw",
+        &RenderWindow::quickDraw,
         "frameImage",
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &
@@ -123,6 +237,46 @@ void registerLuaBindings(sol::state_view _lua)
         "setAutoResize",
         &PaperWindow::setAutoResize,
         "autoResize",
-        &PaperWindow::autoResize);
+        &PaperWindow::autoResize,
+        "drawPathOutline",
+        sol::overload(&PaperWindow::drawPathOutline,
+                      [](PaperWindow * _self, Path * _path, const ColorRGBA & _col) {
+                          _self->drawPathOutline(_path, _col);
+                      }),
+        "drawMultiplePathOutlines",
+        [](PaperWindow * _self, sol::table _paths, const ColorRGBA & _col, bool _bDrawChildren) {
+            DynamicArray<Path *> items;
+            detail::_tableToPaperItems<Path>(_paths, items);
+            _self->drawMultiplePathOutlines(&items[0], items.count(), _col, _bDrawChildren);
+        },
+        "drawPathHandles",
+        sol::overload(&PaperWindow::drawPathHandles,
+                      [](PaperWindow * _self, Path * _path, const ColorRGBA & _col) {
+                          _self->drawPathHandles(_path, _col);
+                      },
+                      [](PaperWindow * _self, Path * _path, const ColorRGBA & _col, Float32 _rad) {
+                          _self->drawPathHandles(_path, _col, _rad);
+                      }),
+        "drawMultiplePathHandles",
+        [](PaperWindow * _self,
+           sol::table _paths,
+           const ColorRGBA & _col,
+           Float32 _rad,
+           bool _bDrawChildren) {
+            DynamicArray<Path *> items;
+            detail::_tableToPaperItems<Path>(_paths, items);
+            _self->drawMultiplePathHandles(&items[0], items.count(), _col, _rad, _bDrawChildren);
+        },
+        "drawItemBoundingBox",
+        sol::overload(&PaperWindow::drawItemBoundingBox,
+                      [](PaperWindow * _self, Item * _item, const ColorRGBA & _col) {
+                          _self->drawItemBoundingBox(_item, _col);
+                      }),
+        "drawMultipleItemBoundingBoxes",
+        [](PaperWindow * _self, sol::table _paths, const ColorRGBA & _col, bool _bDrawChildren) {
+            DynamicArray<Item *> items;
+            detail::_tableToPaperItems<Item>(_paths, items);
+            _self->drawMultipleItemBoundingBoxes(&items[0], items.count(), _col, _bDrawChildren);
+        });
 }
 } // namespace chuckle

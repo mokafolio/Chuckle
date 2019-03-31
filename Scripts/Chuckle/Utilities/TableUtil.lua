@@ -15,7 +15,7 @@ util.randomEntryWithIndex = function(_presetTable)
 end
 
 util.find = function(_array, _value)
-    for i,v in pairs(_array) do
+    for i,v in ipairs(_array) do
         if v == _value then return i end
     end
     return nil

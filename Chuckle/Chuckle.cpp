@@ -6,8 +6,6 @@
 #include <Chuckle/ChuckleLuaBindings.hpp>
 #include <Chuckle/ImGuiLuaBindings.hpp>
 
-// #include <whereami.h>
-
 #define RETURN_ON_ERR(_err)                                                                        \
     if (_err)                                                                                      \
     {                                                                                              \
@@ -16,15 +14,6 @@
     }
 
 using namespace stick;
-
-// static String executablePath()
-// {
-//     int length = wai_getExecutablePath(NULL, 0, NULL);
-//     String ret;
-//     ret.resize(length);
-//     wai_getExecutablePath((char *)ret.ptr(), length, NULL);
-//     return ret;
-// }
 
 int main(int _argc, const char * _args[])
 {
@@ -50,7 +39,6 @@ int main(int _argc, const char * _args[])
     packagePath.append("/../Scripts/?/init.lua'");
     
     lua.script(packagePath.cString());
-
     lua.script(loadTextFile(parser.get<String>("script")).ensure().cString());
     return EXIT_SUCCESS;
 }
