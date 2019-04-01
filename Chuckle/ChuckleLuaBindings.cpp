@@ -213,7 +213,47 @@ void registerLuaBindings(sol::state_view _lua)
         "run",
         &RenderWindow::run,
         "fps",
-        &RenderWindow::fps);
+        &RenderWindow::fps,
+                "drawPathOutline",
+        sol::overload(&RenderWindow::drawPathOutline,
+                      [](RenderWindow * _self, Path * _path, RenderInterface & _ri, const ColorRGBA & _col) {
+                          _self->drawPathOutline(_path, _ri, _col);
+                      }),
+        "drawMultiplePathOutlines",
+        [](RenderWindow * _self, sol::table _paths, RenderInterface & _ri, const ColorRGBA & _col, bool _bDrawChildren) {
+            DynamicArray<Path *> items;
+            detail::_tableToPaperItems<Path>(_paths, items);
+            _self->drawMultiplePathOutlines(&items[0], items.count(), _ri, _col, _bDrawChildren);
+        },
+        "drawPathHandles",
+        sol::overload(&RenderWindow::drawPathHandles,
+                      [](RenderWindow * _self, Path * _path, const ColorRGBA & _col) {
+                          _self->drawPathHandles(_path, _col);
+                      },
+                      [](RenderWindow * _self, Path * _path, const ColorRGBA & _col, Float32 _rad) {
+                          _self->drawPathHandles(_path, _col, _rad);
+                      }),
+        "drawMultiplePathHandles",
+        [](RenderWindow * _self,
+           sol::table _paths,
+           const ColorRGBA & _col,
+           Float32 _rad,
+           bool _bDrawChildren) {
+            DynamicArray<Path *> items;
+            detail::_tableToPaperItems<Path>(_paths, items);
+            _self->drawMultiplePathHandles(&items[0], items.count(), _col, _rad, _bDrawChildren);
+        },
+        "drawItemBoundingBox",
+        sol::overload(&RenderWindow::drawItemBoundingBox,
+                      [](RenderWindow * _self, Item * _item, const ColorRGBA & _col) {
+                          _self->drawItemBoundingBox(_item, _col);
+                      }),
+        "drawMultipleItemBoundingBoxes",
+        [](RenderWindow * _self, sol::table _paths, const ColorRGBA & _col, bool _bDrawChildren) {
+            DynamicArray<Item *> items;
+            detail::_tableToPaperItems<Item>(_paths, items);
+            _self->drawMultipleItemBoundingBoxes(&items[0], items.count(), _col, _bDrawChildren);
+        });
 
     globals.new_usertype<PaperWindow>(
         "PaperWindow",
@@ -248,35 +288,6 @@ void registerLuaBindings(sol::state_view _lua)
             DynamicArray<Path *> items;
             detail::_tableToPaperItems<Path>(_paths, items);
             _self->drawMultiplePathOutlines(&items[0], items.count(), _col, _bDrawChildren);
-        },
-        "drawPathHandles",
-        sol::overload(&PaperWindow::drawPathHandles,
-                      [](PaperWindow * _self, Path * _path, const ColorRGBA & _col) {
-                          _self->drawPathHandles(_path, _col);
-                      },
-                      [](PaperWindow * _self, Path * _path, const ColorRGBA & _col, Float32 _rad) {
-                          _self->drawPathHandles(_path, _col, _rad);
-                      }),
-        "drawMultiplePathHandles",
-        [](PaperWindow * _self,
-           sol::table _paths,
-           const ColorRGBA & _col,
-           Float32 _rad,
-           bool _bDrawChildren) {
-            DynamicArray<Path *> items;
-            detail::_tableToPaperItems<Path>(_paths, items);
-            _self->drawMultiplePathHandles(&items[0], items.count(), _col, _rad, _bDrawChildren);
-        },
-        "drawItemBoundingBox",
-        sol::overload(&PaperWindow::drawItemBoundingBox,
-                      [](PaperWindow * _self, Item * _item, const ColorRGBA & _col) {
-                          _self->drawItemBoundingBox(_item, _col);
-                      }),
-        "drawMultipleItemBoundingBoxes",
-        [](PaperWindow * _self, sol::table _paths, const ColorRGBA & _col, bool _bDrawChildren) {
-            DynamicArray<Item *> items;
-            detail::_tableToPaperItems<Item>(_paths, items);
-            _self->drawMultipleItemBoundingBoxes(&items[0], items.count(), _col, _bDrawChildren);
         });
 }
 } // namespace chuckle
