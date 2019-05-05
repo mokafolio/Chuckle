@@ -27,7 +27,8 @@ window:setDrawFunction(function(_dt)
 
             if gui.beginDragDropSource(gui.DragDropFlags.None) then
                 print("SETTING PAYLOAD", i)
-                gui.setDragDropPayload("DragSource", i)
+                gui.setDragDropPayload("DragSource", i, gui.Cond.Once)
+                gui.text(buttons[i]);
                 gui.endDragDropSource()
             end
 
