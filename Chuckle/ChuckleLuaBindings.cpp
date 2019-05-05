@@ -214,13 +214,20 @@ void registerLuaBindings(sol::state_view _lua)
         &RenderWindow::run,
         "fps",
         &RenderWindow::fps,
-                "drawPathOutline",
-        sol::overload(&RenderWindow::drawPathOutline,
-                      [](RenderWindow * _self, Path * _path, RenderInterface & _ri, const ColorRGBA & _col) {
-                          _self->drawPathOutline(_path, _ri, _col);
-                      }),
+        "frameCount",
+        &RenderWindow::frameCount,
+        "drawPathOutline",
+        sol::overload(
+            &RenderWindow::drawPathOutline,
+            [](RenderWindow * _self, Path * _path, RenderInterface & _ri, const ColorRGBA & _col) {
+                _self->drawPathOutline(_path, _ri, _col);
+            }),
         "drawMultiplePathOutlines",
-        [](RenderWindow * _self, sol::table _paths, RenderInterface & _ri, const ColorRGBA & _col, bool _bDrawChildren) {
+        [](RenderWindow * _self,
+           sol::table _paths,
+           RenderInterface & _ri,
+           const ColorRGBA & _col,
+           bool _bDrawChildren) {
             DynamicArray<Path *> items;
             detail::_tableToPaperItems<Path>(_paths, items);
             _self->drawMultiplePathOutlines(&items[0], items.count(), _ri, _col, _bDrawChildren);
@@ -289,5 +296,26 @@ void registerLuaBindings(sol::state_view _lua)
             detail::_tableToPaperItems<Path>(_paths, items);
             _self->drawMultiplePathOutlines(&items[0], items.count(), _col, _bDrawChildren);
         });
+
+    globals.new_enum("FileDialogFlags",
+                     "Open",
+                     FileDialogFlags::Open,
+                     "Save",
+                     FileDialogFlags::Save,
+                     "Directory",
+                     FileDialogFlags::Directory,
+                     "OverwriteConfirmation",
+                     FileDialogFlags::OverwriteConfirmation);
+
+    globals.set_function("fileDialog",
+                         [](FileDialogFlags _flags,
+                            sol::optional<const char *> _filter,
+                            sol::optional<const char *> _path,
+                            sol::optional<const char *> _fileName) {
+                             return fileDialog(_flags,
+                                               _filter ? *_filter : NULL,
+                                               _path ? *_path : NULL,
+                                               _fileName ? *_fileName : NULL);
+                         });
 }
 } // namespace chuckle

@@ -1,7 +1,7 @@
-
 #include <Chuckle/ImGuiLuaBindings.hpp>
 #include <Stick/DynamicArray.hpp>
 #include <Stick/String.hpp>
+#include <Stick/HashMap.hpp>
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -1104,16 +1104,38 @@ void registerImGuiBindings(sol::state_view _lua)
 
     //@TODO: add overloads
     imgui["inputText"] = [](const char * _label, int _capacity, sol::function _cb) {
-        static stick::String s_buffer;
-        s_buffer.reserve(_capacity);
-        if (ImGui::InputText(_label, &s_buffer[0], s_buffer.capacity()))
-            _cb(s_buffer.cString());
+        //@TODO: This is kinda gnarly
+        static stick::HashMap<const char *, stick::String> s_stringStorage;
+        auto it = s_stringStorage.find(_label);
+        stick::String * str;
+        if(it != s_stringStorage.end())
+            str = &it->value;
+        else
+        {
+            auto res = s_stringStorage.insert(_label, String());
+            str = &res.iterator->value;
+        }
+
+        str->reserve(_capacity);
+        if (ImGui::InputText(_label, &(*str)[0], str->capacity()))
+            _cb(str->cString());
     };
     imgui["inputTextMultiline"] = [](const char * _label, int _capacity, sol::function _cb) {
-        static stick::String s_buffer;
-        s_buffer.reserve(_capacity);
-        if (ImGui::InputTextMultiline(_label, &s_buffer[0], s_buffer.capacity()))
-            _cb(s_buffer.cString());
+        //@TODO: This is kinda gnarly
+        static stick::HashMap<const char *, stick::String> s_stringStorage;
+        auto it = s_stringStorage.find(_label);
+        stick::String * str;
+        if(it != s_stringStorage.end())
+            str = &it->value;
+        else
+        {
+            auto res = s_stringStorage.insert(_label, String());
+            str = &res.iterator->value;
+        }
+
+        str->reserve(_capacity);
+        if (ImGui::InputTextMultiline(_label, &(*str)[0], str->capacity()))
+            _cb(str->cString());
     };
 
     imgui["inputFloat"] = sol::overload(
@@ -1353,11 +1375,38 @@ void registerImGuiBindings(sol::state_view _lua)
     imgui["setTabItemClosed"] = ImGui::SetTabItemClosed;
 
     imgui["beginDragDropSource"] = sol::overload(ImGui::BeginDragDropSource, [](){ return ImGui::BeginDragDropSource(); });
-    //@TODO: SetDragDropPayload
+    imgui["setDragDropPayload"] = [](const char * _name, const sol::object & _obj)
+    {
+        static sol::object s_obj;
+        s_obj = _obj;
+        sol::object * ptr = &s_obj;
+        return ImGui::SetDragDropPayload(_name, &ptr, sizeof(ptr));
+    };
+
+    imgui["test"] = [](const sol::object & _obj, sol::this_state _s)
+    {   
+        sol::state_view view(_s);
+        printf("typename %s\n", sol::type_name(_s, _obj.get_type()).c_str());
+        if(_obj.get_type() == sol::type::userdata)
+        {
+            int c = _obj.push();
+            printf("usertype: %s\n", sol::associated_type_name(_s, -1, _obj.get_type()).c_str());
+            lua_pop(_s, c);
+        }
+    };
     imgui["endDragDropSource"] = ImGui::EndDragDropSource;
     imgui["beginDragDropTarget"] = ImGui::BeginDragDropTarget;
     //@TODO: expose ImGuiPayload
-    imgui["acceptDragDropPayload"] = sol::overload(ImGui::AcceptDragDropPayload, [](const char * _str) { return ImGui::AcceptDragDropPayload(_str); });
+    // imgui["acceptDragDropPayload"] = sol::overload(ImGui::AcceptDragDropPayload, [](const char * _str) { return ImGui::AcceptDragDropPayload(_str); });
+    imgui["acceptDragDropPayload"] = [](const char * _name, sol::function _cb, sol::this_state _s)
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(_name))
+        {
+            STICK_ASSERT(payload->DataSize == sizeof(sol::object*));
+            const sol::object * obj = (*(const sol::object**)payload->Data);
+            _cb(*obj);
+        }
+    };
     imgui["endDragDropTarget"] = ImGui::EndDragDropTarget;
     imgui["getDragDropPayload"] = ImGui::GetDragDropPayload;
 

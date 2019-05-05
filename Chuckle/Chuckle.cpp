@@ -27,6 +27,7 @@ int main(int _argc, const char * _args[])
                        sol::lib::package,
                        sol::lib::os,
                        sol::lib::math,
+                       sol::lib::io,
                        sol::lib::table);
     chuckle::registerLuaBindings(lua);
     chuckle::registerImGuiBindings(lua);
