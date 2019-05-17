@@ -1,7 +1,7 @@
 #include <Chuckle/ImGuiLuaBindings.hpp>
 #include <Stick/DynamicArray.hpp>
-#include <Stick/String.hpp>
 #include <Stick/HashMap.hpp>
+#include <Stick/String.hpp>
 
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -669,6 +669,24 @@ void registerImGuiBindings(sol::state_view _lua)
                    "ChildMenu",
                    1 << 28);
 
+    // some flags that are useful but live in the internal imgui for now as their api will most
+    // likely change.
+    imgui.new_enum("ItemFlags",
+                   "NoTabStop",
+                   1 << 0,
+                   "ButtonRepeat",
+                   1 << 1,
+                   "Disabled",
+                   1 << 2,
+                   "NoNav",
+                   1 << 3,
+                   "NoNavDefaultFocus",
+                   1 << 4,
+                   "SelectableDontClosePopup",
+                   1 << 5,
+                   "Default",
+                   0);
+
     //@TODO: Put a lot more stuff in here
     imgui.new_usertype<ImGuiIO>("IO",
                                 "new",
@@ -683,6 +701,9 @@ void registerImGuiBindings(sol::state_view _lua)
                                 &ImGuiIO::DeltaTime,
                                 "iniSavingRate",
                                 &ImGuiIO::IniSavingRate);
+
+    imgui["pushItemFlag"] = ImGui::PushItemFlag;
+    imgui["popItemFlag"] = ImGui::PopItemFlag;
 
     imgui["createContext"] = []() { return ImGui::CreateContext(); };
     imgui["destroyContext"] =
@@ -914,7 +935,7 @@ void registerImGuiBindings(sol::state_view _lua)
 
     imgui["beginCombo"] =
         sol::overload(ImGui::BeginCombo, [](const char * _label, const char * _preview_value) {
-            ImGui::BeginCombo(_label, _preview_value);
+            return ImGui::BeginCombo(_label, _preview_value);
         });
     imgui["endCombo"] = ImGui::EndCombo;
 
@@ -1108,7 +1129,7 @@ void registerImGuiBindings(sol::state_view _lua)
         static stick::HashMap<const char *, stick::String> s_stringStorage;
         auto it = s_stringStorage.find(_label);
         stick::String * str;
-        if(it != s_stringStorage.end())
+        if (it != s_stringStorage.end())
             str = &it->value;
         else
         {
@@ -1125,7 +1146,7 @@ void registerImGuiBindings(sol::state_view _lua)
         static stick::HashMap<const char *, stick::String> s_stringStorage;
         auto it = s_stringStorage.find(_label);
         stick::String * str;
-        if(it != s_stringStorage.end())
+        if (it != s_stringStorage.end())
             str = &it->value;
         else
         {
@@ -1200,13 +1221,17 @@ void registerImGuiBindings(sol::state_view _lua)
         if (ImGui::ColorEdit3(_label, tmp))
             _cb(tmp[0], tmp[1], tmp[2]);
     };
-    //@TODO: Overload
     imgui["colorEdit4"] =
-        [](const char * _label, float _r, float _g, float _b, float _a, sol::function _cb) {
+        sol::overload([](const char * _label, float _r, float _g, float _b, float _a, sol::function _cb) {
             float tmp[4] = { _r, _g, _b, _a };
             if (ImGui::ColorEdit4(_label, tmp))
                 _cb(tmp[0], tmp[1], tmp[2], tmp[3]);
-        };
+        },
+        [](const char * _label, float _r, float _g, float _b, float _a, ImGuiColorEditFlags _flags, sol::function _cb) {
+            float tmp[4] = { _r, _g, _b, _a };
+            if (ImGui::ColorEdit4(_label, tmp, _flags))
+                _cb(tmp[0], tmp[1], tmp[2], tmp[3]);
+        });
     //@TODO: Overload
     imgui["colorPicker3"] =
         [](const char * _label, float _r, float _g, float _b, sol::function _cb) {
@@ -1374,20 +1399,19 @@ void registerImGuiBindings(sol::state_view _lua)
     imgui["endTabItem"] = ImGui::EndTabItem;
     imgui["setTabItemClosed"] = ImGui::SetTabItemClosed;
 
-    imgui["beginDragDropSource"] = sol::overload(ImGui::BeginDragDropSource, [](){ return ImGui::BeginDragDropSource(); });
-    imgui["setDragDropPayload"] = [](const char * _name, const sol::object & _obj)
-    {
+    imgui["beginDragDropSource"] =
+        sol::overload(ImGui::BeginDragDropSource, []() { return ImGui::BeginDragDropSource(); });
+    imgui["setDragDropPayload"] = [](const char * _name, const sol::object & _obj) {
         static sol::object s_obj;
         s_obj = _obj;
         sol::object * ptr = &s_obj;
         return ImGui::SetDragDropPayload(_name, &ptr, sizeof(ptr));
     };
 
-    imgui["test"] = [](const sol::object & _obj, sol::this_state _s)
-    {   
+    imgui["test"] = [](const sol::object & _obj, sol::this_state _s) {
         sol::state_view view(_s);
         printf("typename %s\n", sol::type_name(_s, _obj.get_type()).c_str());
-        if(_obj.get_type() == sol::type::userdata)
+        if (_obj.get_type() == sol::type::userdata)
         {
             int c = _obj.push();
             printf("usertype: %s\n", sol::associated_type_name(_s, -1, _obj.get_type()).c_str());
@@ -1397,13 +1421,13 @@ void registerImGuiBindings(sol::state_view _lua)
     imgui["endDragDropSource"] = ImGui::EndDragDropSource;
     imgui["beginDragDropTarget"] = ImGui::BeginDragDropTarget;
     //@TODO: expose ImGuiPayload
-    // imgui["acceptDragDropPayload"] = sol::overload(ImGui::AcceptDragDropPayload, [](const char * _str) { return ImGui::AcceptDragDropPayload(_str); });
-    imgui["acceptDragDropPayload"] = [](const char * _name, sol::function _cb, sol::this_state _s)
-    {
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(_name))
+    // imgui["acceptDragDropPayload"] = sol::overload(ImGui::AcceptDragDropPayload, [](const char *
+    // _str) { return ImGui::AcceptDragDropPayload(_str); });
+    imgui["acceptDragDropPayload"] = [](const char * _name, sol::function _cb, sol::this_state _s) {
+        if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload(_name))
         {
-            STICK_ASSERT(payload->DataSize == sizeof(sol::object*));
-            const sol::object * obj = (*(const sol::object**)payload->Data);
+            STICK_ASSERT(payload->DataSize == sizeof(sol::object *));
+            const sol::object * obj = (*(const sol::object **)payload->Data);
             _cb(*obj);
         }
     };
@@ -1416,22 +1440,45 @@ void registerImGuiBindings(sol::state_view _lua)
     imgui["setItemDefaultFocus"] = ImGui::SetItemDefaultFocus;
     imgui["setKeyboardFocusHere"] = ImGui::SetKeyboardFocusHere;
 
-    imgui["isItemHovered"] = sol::overload(ImGui::IsItemHovered, [](){ return ImGui::IsItemHovered(); });
-    imgui["IsItemActive"] = ImGui::IsItemActive;
-    imgui["IsItemFocused"] = ImGui::IsItemFocused;
-    imgui["IsItemClicked"] = sol::overload(ImGui::IsItemClicked, [](){ return ImGui::IsItemClicked(); });
-    imgui["IsItemVisible"] = ImGui::IsItemVisible;
-    imgui["IsItemEdited"] = ImGui::IsItemEdited;
-    imgui["IsItemActivated"] = ImGui::IsItemActivated;
-    imgui["IsItemDeactivated"] = ImGui::IsItemDeactivated;
-    imgui["IsItemDeactivatedAfterEdit"] = ImGui::IsItemDeactivatedAfterEdit;
-    imgui["IsAnyItemHovered"] = ImGui::IsAnyItemHovered;
-    imgui["IsAnyItemActive"] = ImGui::IsAnyItemActive;
-    imgui["IsAnyItemFocused"] = ImGui::IsAnyItemFocused;
-    imgui["GetItemRectMin"] = ImGui::GetItemRectMin;
-    imgui["GetItemRectMax"] = ImGui::GetItemRectMax;
-    imgui["GetItemRectSize"] = ImGui::GetItemRectSize;
-    imgui["SetItemAllowOverlap"] = ImGui::SetItemAllowOverlap;
+    imgui["isItemHovered"] =
+        sol::overload(ImGui::IsItemHovered, []() { return ImGui::IsItemHovered(); });
+    imgui["isItemActive"] = ImGui::IsItemActive;
+    imgui["isItemFocused"] = ImGui::IsItemFocused;
+    imgui["isItemClicked"] =
+        sol::overload(ImGui::IsItemClicked, []() { return ImGui::IsItemClicked(); });
+    imgui["isItemVisible"] = ImGui::IsItemVisible;
+    imgui["isItemEdited"] = ImGui::IsItemEdited;
+    imgui["isItemActivated"] = ImGui::IsItemActivated;
+    imgui["isItemDeactivated"] = ImGui::IsItemDeactivated;
+    imgui["isItemDeactivatedAfterEdit"] = ImGui::IsItemDeactivatedAfterEdit;
+    imgui["isAnyItemHovered"] = ImGui::IsAnyItemHovered;
+    imgui["isAnyItemActive"] = ImGui::IsAnyItemActive;
+    imgui["isAnyItemFocused"] = ImGui::IsAnyItemFocused;
+    imgui["getItemRectMin"] = ImGui::GetItemRectMin;
+    imgui["getItemRectMax"] = ImGui::GetItemRectMax;
+    imgui["getItemRectSize"] = ImGui::GetItemRectSize;
+    imgui["setItemAllowOverlap"] = ImGui::SetItemAllowOverlap;
+
+    imgui["getKeyIndex"] = ImGui::GetKeyIndex;
+    imgui["isKeyDown"] = ImGui::IsKeyDown;
+    imgui["isKeyPressed"] = ImGui::IsKeyPressed;
+    imgui["isKeyReleased"] = ImGui::IsKeyReleased;
+    imgui["getKeyPressedAmount"] = ImGui::GetKeyPressedAmount;
+    imgui["isMouseDown"] = ImGui::IsMouseDown;
+    imgui["isAnyMouseDown"] = ImGui::IsAnyMouseDown;
+    imgui["isMouseClicked"] = ImGui::IsMouseClicked;
+    imgui["isMouseDoubleClicked"] = ImGui::IsMouseDoubleClicked;
+    imgui["isMouseReleased"] = ImGui::IsMouseReleased;
+    imgui["isMouseDragging"] = ImGui::IsMouseDragging;
+    imgui["isMouseHoveringRect"] = ImGui::IsMouseHoveringRect;
+    imgui["getMousePos"] = ImGui::GetMousePos;
+    imgui["getMousePosOnOpeningCurrentPopup"] = ImGui::GetMousePosOnOpeningCurrentPopup;
+    imgui["getMouseDragDelta"] = ImGui::GetMouseDragDelta;
+    imgui["resetMouseDragDelta"] = ImGui::ResetMouseDragDelta;
+    imgui["getMouseCursor"] = ImGui::GetMouseCursor;
+    imgui["setMouseCursor"] = ImGui::SetMouseCursor;
+    imgui["captureKeyboardFromApp"] = ImGui::CaptureKeyboardFromApp;
+    imgui["captureMouseFromApp"] = ImGui::CaptureMouseFromApp;
 }
 } // namespace chuckle
 

@@ -1,10 +1,10 @@
-#include <Stick/ArgumentParser.hpp>
+// #include <Stick/ArgumentParser.hpp>
 #include <Stick/FileUtilities.hpp>
 #include <Stick/Path.hpp>
 
-#include <ChuckleCore/ChuckleCore.hpp>
 #include <Chuckle/ChuckleLuaBindings.hpp>
 #include <Chuckle/ImGuiLuaBindings.hpp>
+#include <ChuckleCore/ChuckleCore.hpp>
 
 #define RETURN_ON_ERR(_err)                                                                        \
     if (_err)                                                                                      \
@@ -17,9 +17,15 @@ using namespace stick;
 
 int main(int _argc, const char * _args[])
 {
-    ArgumentParser parser("Chuckle");
-    RETURN_ON_ERR(parser.addArgument("-s", "--script", 1, false));
-    RETURN_ON_ERR(parser.parse(_args, _argc));
+    // ArgumentParser parser("Chuckle");
+    // RETURN_ON_ERR(parser.addArgument("-s", "--script", 1, false));
+    // RETURN_ON_ERR(parser.parse(_args, _argc));
+
+    if (_argc < 2)
+    {
+        std::fprintf(stderr, "No script provided");
+        return EXIT_FAILURE;
+    }
 
     sol::state lua;
     lua.open_libraries(sol::lib::base,
@@ -38,8 +44,16 @@ int main(int _argc, const char * _args[])
     packagePath.append("/../Scripts/?.lua;");
     packagePath.append(dirName);
     packagePath.append("/../Scripts/?/init.lua'");
-    
+
     lua.script(packagePath.cString());
-    lua.script(loadTextFile(parser.get<String>("script")).ensure().cString());
+
+    auto tbl = lua.create_table();
+    for(Size i = 1; i < _argc; ++i)
+        tbl.add(_args[i]);
+
+    lua["__args"] = tbl;
+
+    lua.script(loadTextFile(_args[1]).ensure().cString());
+
     return EXIT_SUCCESS;
 }

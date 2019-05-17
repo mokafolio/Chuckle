@@ -12,7 +12,7 @@ util.misc.exitOnError(window)
 util.misc.exitOnError(window:enableDefaultUI())
 local rd = window:renderDevice()
 
-local buttons = {"uno", "dos", "tres"}
+local buttons = {"eins", "zwei", "drei", "vier", "fünf", "sechs", "sieben", "acht", "neun"}
 window:setDrawFunction(function(_dt)
 
     gui.beginWindowClosable("Document", function(_bOpen)
@@ -21,12 +21,10 @@ window:setDrawFunction(function(_dt)
             gui.pushID(i)
             
             gui.button(buttons[i], {60,60})
-            if i < #buttons then
-                gui.sameLine()
-            end
+
+            if (((i-1) % 3) < 2) then gui.sameLine() end
 
             if gui.beginDragDropSource(gui.DragDropFlags.None) then
-                print("SETTING PAYLOAD", i)
                 gui.setDragDropPayload("DragSource", i, gui.Cond.Once)
                 gui.text(buttons[i]);
                 gui.endDragDropSource()
@@ -34,7 +32,6 @@ window:setDrawFunction(function(_dt)
 
             if  gui.beginDragDropTarget() then
                 gui.acceptDragDropPayload("DragSource", function(_payload)
-                    print("I ACCEPT YOU MY MAAAJN", _payload)
                     buttons[i], buttons[_payload] = buttons[_payload], buttons[i]
                 end)
                 gui.endDragDropTarget()
