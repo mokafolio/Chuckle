@@ -44,11 +44,15 @@ int main(int _argc, const char * _args[])
     packagePath.append("/../Scripts/?.lua;");
     packagePath.append(dirName);
     packagePath.append("/../Scripts/?/init.lua'");
+    packagePath.append(dirName);
+    packagePath.append("/../Scripts/Deps/?.lua;");
+    packagePath.append(dirName);
+    packagePath.append("/../Scripts/Deps/?/init.lua'");
 
     lua.script(packagePath.cString());
 
     auto tbl = lua.create_table();
-    for(Size i = 1; i < _argc; ++i)
+    for(Size i = 2; i < _argc; ++i)
         tbl.add(_args[i]);
 
     lua["__args"] = tbl;

@@ -953,7 +953,7 @@ void registerImGuiBindings(sol::state_view _lua)
            float _v_speed,
            float _v_min,
            sol::function _cb) {
-            if (ImGui::DragFloat(_label, &_currentValue, _v_speed, _v_min))
+            if (ImGui::DragFloat(_label, &_currentValue, _v_speed, _v_min, std::numeric_limits<Float32>::max()))
                 _cb(_currentValue);
         },
         [](const char * _label,
@@ -1350,14 +1350,12 @@ void registerImGuiBindings(sol::state_view _lua)
                       []() { return ImGui::BeginPopupContextVoid(); }),
     imgui["beginPopupModal"] = sol::overload(
         [](const char * _name, sol::function _cb) {
-            bool bOpen = true;
-            if (ImGui::BeginPopupModal(_name, &bOpen))
-                _cb(bOpen);
+            if (ImGui::BeginPopupModal(_name, NULL))
+                _cb();
         },
         [](const char * _name, ImGuiWindowFlags _flags, sol::function _cb) {
-            bool bOpen = true;
-            if (ImGui::BeginPopupModal(_name, &bOpen, _flags))
-                _cb(bOpen);
+            if (ImGui::BeginPopupModal(_name, NULL, _flags))
+                _cb();
         }),
     imgui["endPopup"] = ImGui::EndPopup;
     imgui["openPopupOnItemClick"] =
@@ -1515,6 +1513,41 @@ struct pusher<ImVec2>
         sol::table tbl(L, sol::new_table(0, 2));
         tbl["x"] = _vec.x;
         tbl["y"] = _vec.y;
+        sol::stack::push(L, tbl);
+        return 1;
+    }
+};
+
+template <>
+struct checker<ImVec4>
+{
+    template <typename Handler>
+    static bool check(lua_State * L, int index, Handler && handler, record & tracking)
+    {
+        return sol::stack::check<sol::table>(L, index, handler, tracking);
+    }
+};
+
+template <>
+struct getter<ImVec4>
+{
+    static ImVec4 get(lua_State * L, int index, record & tracking)
+    {
+        sol::table oPos = sol::stack::get<sol::table>(L, lua_absindex(L, index), tracking);
+        return { oPos[1], oPos[2], oPos[3], oPos[4] };
+    }
+};
+
+template <>
+struct pusher<ImVec4>
+{
+    static int push(lua_State * L, const ImVec4 & _vec)
+    {
+        sol::table tbl(L, sol::new_table(0, 4));
+        tbl["x"] = _vec.x;
+        tbl["y"] = _vec.y;
+        tbl["z"] = _vec.z;
+        tbl["w"] = _vec.w;
         sol::stack::push(L, tbl);
         return 1;
     }
