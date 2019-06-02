@@ -1,3 +1,4 @@
+local tbl = require("Chuckle.Utilities.TableUtil")
 local util = {}
 
 util.promote = function(_self, _toTable)
@@ -70,7 +71,7 @@ end
 local __hex = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"}
 util.randomHexString = function(_length)
     if _length > 0 then
-        return util.randomHexString(_length - 1) .. util.randomTableEntry(__hex)
+        return util.randomHexString(_length - 1) .. tbl.randomEntry(__hex)
     else
         return ""
     end
