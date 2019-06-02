@@ -43,7 +43,7 @@ int main(int _argc, const char * _args[])
     packagePath.append(dirName);
     packagePath.append("/../Scripts/?.lua;");
     packagePath.append(dirName);
-    packagePath.append("/../Scripts/?/init.lua'");
+    packagePath.append("/../Scripts/?/init.lua;");
     packagePath.append(dirName);
     packagePath.append("/../Scripts/Deps/?.lua;");
     packagePath.append(dirName);
