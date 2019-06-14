@@ -1,2 +1,3 @@
 option('buildSubmodules', type : 'boolean', value : true)
-option('installDir', type : 'string', value : '/opt/Chuckle')
+option('forceSharedLibrary', type : 'boolean', value : true)
+option('forceInstallHeaders', type : 'boolean', value : true)

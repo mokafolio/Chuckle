@@ -1,4 +1,4 @@
-project('Chuckle', ['cpp', 'c'], default_options : ['cpp_std=c++14'])
+project('Chuckle', ['cpp', 'c'], default_options : ['cpp_std=c++14', 'prefix=/opt/Chuckle', 'default_library=static'])
 
 cc = meson.get_compiler('cpp')
 
@@ -38,18 +38,19 @@ if host_machine.system() == 'linux'
 endif
 
 name = 'chuckle'
-bindir = join_paths(get_option('installDir'), 'bin')
+bindir = join_paths(get_option('prefix'), 'bin')
 chuckle = executable(name, ['Chuckle/Chuckle.cpp', 
     'Chuckle/ChuckleLuaBindings.cpp',
     'Chuckle/ImGuiLuaBindings.cpp'],
     dependencies: deps, 
-    cpp_args:'-ftemplate-depth=10000', 
+    cpp_args:'-ftemplate-depth=10000', #for sol lua binding compilation oO
     include_directories: incDirs,
-    install: true,
-    install_dir: bindir)
+    install: true)
 
-install_subdir('Scripts', install_dir: get_option('installDir'))
-install_subdir('Assets', install_dir: get_option('installDir'))
+install_subdir('Scripts', install_dir:'.')
+install_subdir('Assets', install_dir:'.')
 
 #meson symlink workaround, this kind of sucks as it won't be automatically removed on uninstall
-meson.add_install_script('ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name))
+if get_option('prefix') != '/usr/local'
+    meson.add_install_script('ln', '-s', join_paths(bindir, name), join_paths('/usr/local/bin', name))
+endif
