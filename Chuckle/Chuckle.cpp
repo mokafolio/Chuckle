@@ -23,7 +23,7 @@ int main(int _argc, const char * _args[])
 
     if (_argc < 2)
     {
-        std::fprintf(stderr, "No script provided");
+        std::fprintf(stderr, "No script provided\n");
         return EXIT_FAILURE;
     }
 
