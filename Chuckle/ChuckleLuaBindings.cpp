@@ -180,11 +180,8 @@ void registerLuaBindings(sol::state_view _lua)
         "enableDefaultUI",
         sol::overload(&RenderWindow::enableDefaultUI,
                       [](RenderWindow * _self) {
-                          return _self->enableDefaultUI(
-                              stick::path::join(executableDirectoryName(),
-                                                "../Assets/RobotoMono-Regular.ttf")
-                                  .cString(),
-                              14);
+                          return _self->enableDefaultUI(stick::path::join(executableDirectoryName(),
+                                                        "../Assets/RobotoMono-Regular.ttf").cString(), 14);
                       }),
         "setShowWindowMetrics",
         &RenderWindow::setShowWindowMetrics,
