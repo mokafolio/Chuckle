@@ -37,3 +37,6 @@
 [submodule "subprojects/Pic"]
 	path = subprojects/Pic
 	url = https://github.com/mokafolio/Pic.git
+[submodule "subprojects/PicLuaSol"]
+	path = subprojects/PicLuaSol
+	url = https://github.com/mokafolio/PicLuaSol.git

@@ -53,7 +53,7 @@ int main(int _argc, const char * _args[])
         lua.script(packagePath.cString());
 
         auto tbl = lua.create_table();
-        for (Size i = 2; i < _argc; ++i)
+        for (Int32 i = 2; i < _argc; ++i)
             tbl.add(_args[i]);
 
         lua["__args"] = tbl;

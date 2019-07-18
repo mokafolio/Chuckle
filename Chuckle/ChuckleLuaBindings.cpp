@@ -1,15 +1,19 @@
 #include <Chuckle/ChuckleLuaBindings.hpp>
 
 #include <ChuckleCore/ChuckleCore.hpp>
+// #include <StickLuaSol/StickLuaSol.hpp>
+#include <LukeLuaSol/LukeLuaSol.hpp>
 #include <DabLuaSol/DabLuaSol.hpp>
 #include <LukeLuaSol/LukeLuaSol.hpp>
 #include <PaperLuaSol/PaperLuaSol.hpp>
+#include <PicLuaSol/PicLuaSol.hpp>
 
 namespace sl = stickLuaSol;
-namespace cl = crunchLuaSol;
-namespace pl = paperLuaSol;
-namespace ll = lukeLuaSol;
-namespace dl = dabLuaSol;
+// namespace cl = crunchLuaSol;
+// namespace pl = paperLuaSol;
+// namespace ll = lukeLuaSol;
+// namespace dl = dabLuaSol;
+// namespace picl = picLuaSol;
 
 namespace chuckle
 {
@@ -65,10 +69,16 @@ void _tableToPaperItems(sol::table _table, DynamicArray<ItemT *> & _outData)
 void registerLuaBindings(sol::state_view _lua)
 {
     // first register all existing lua bindings
-    ll::registerLuke(_lua);
-    cl::registerCrunch(_lua);
-    dl::registerDab(_lua);
-    pl::registerPaper(_lua);
+    // ll::registerLuke(_lua);
+    // cl::registerCrunch(_lua);
+    // dl::registerDab(_lua);
+    // pl::registerPaper(_lua);
+    // picl::registerPic(_lua);
+    detail::_registerLukeLuaBindings(_lua);
+    detail::_registerCrunchLuaBindings(_lua);
+    detail::_registerDabLuaBindings(_lua);
+    detail::_registerPaperLuaBindings(_lua);
+    detail::_registerPicLuaBindings(_lua);
 
     // chuckle specific bindings
 
@@ -76,6 +86,23 @@ void registerLuaBindings(sol::state_view _lua)
     // this is a hidden table to hold internal functions
     sol::table chuckle = sl::ensureNamespaceTable(_lua, globals, "__chuckle");
     chuckle.set_function("registerPathUtil", registerPathUtil);
+
+    globals.set_function("setRandomSeed", setRandomSeed);
+    globals.set_function("randomizeSeed", randomizeSeed);
+    globals.set_function("random", sol::overload(randomf, [](Float32 _min, Float32 _max) {
+                             return randomf(_min, _max);
+                         }));
+    globals.set_function("setNoiseSeed", setNoiseSeed);
+    globals.set_function("randomizeNoiseSeed", randomizeNoiseSeed);
+    globals.set_function(
+        "noise",
+        sol::overload(sol::resolve<Float32(Float32)>(noise),
+                      sol::resolve<Float32(Float32, Float32)>(noise),
+                      sol::resolve<Float32(Float32, Float32, Float32)>(noise),
+                      sol::resolve<Float32(Float32, Float32, Float32, Float32)>(noise)));
+
+    globals.set_function("executablePath", []() { return executablePath(); });
+    globals.set_function("executableDirectoryName", []() { return executableDirectoryName(); });
 
     globals.new_usertype<ImGuiInterface>(
         "ImGuiInterface",
@@ -180,8 +207,11 @@ void registerLuaBindings(sol::state_view _lua)
         "enableDefaultUI",
         sol::overload(&RenderWindow::enableDefaultUI,
                       [](RenderWindow * _self) {
-                          return _self->enableDefaultUI(stick::path::join(executableDirectoryName(),
-                                                        "../Assets/RobotoMono-Regular.ttf").cString(), 14);
+                          return _self->enableDefaultUI(
+                              stick::path::join(executableDirectoryName(),
+                                                "../Assets/RobotoMono-Regular.ttf")
+                                  .cString(),
+                              14);
                       }),
         "setShowWindowMetrics",
         &RenderWindow::setShowWindowMetrics,

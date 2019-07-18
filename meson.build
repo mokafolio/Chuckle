@@ -8,13 +8,15 @@ crunchLuaSolProj = subproject('CrunchLuaSol')
 lukeLuaSolProj = subproject('LukeLuaSol')
 paperLuaSolProj = subproject('PaperLuaSol')
 dabLuaSolProj = subproject('DabLuaSol')
+picLuaSol = subproject('PicLuaSol')
 
 deps = [chuckleCoreProj.get_variable('chuckleCoreDep'), 
         stickLuaSolProj.get_variable('stickLuaDep'),
         crunchLuaSolProj.get_variable('crunchLuaDep'),
         lukeLuaSolProj.get_variable('lukeLuaDep'),
         paperLuaSolProj.get_variable('paperLuaDep'),
-        dabLuaSolProj.get_variable('dabLuaDep')]
+        dabLuaSolProj.get_variable('dabLuaDep'),
+        picLuaSol.get_variable('picLuaDep')]
 
 # meseon dependency function to find lua is not very consistent accross platforms yet, so
 # we need to do a lot of manual lifting for now
@@ -41,9 +43,14 @@ name = 'chuckle'
 bindir = join_paths(get_option('prefix'), 'bin')
 chuckle = executable(name, ['Chuckle/Chuckle.cpp', 
     'Chuckle/ChuckleLuaBindings.cpp',
-    'Chuckle/ImGuiLuaBindings.cpp'],
+    'Chuckle/CrunchLuaSol.cpp',
+    'Chuckle/DabLuaSol.cpp',
+    'Chuckle/ImGuiLuaBindings.cpp',
+    'Chuckle/LukeLuaSol.cpp',
+    'Chuckle/PaperLuaSol.cpp',
+    'Chuckle/PicLuaSol.cpp'],
     dependencies: deps, 
-    cpp_args:'-ftemplate-depth=10000', #for sol lua binding compilation oO
+    cpp_args:'-ftemplate-depth=10000', #for sol lua binding compilation on gcc oO
     include_directories: incDirs,
     install: true)
 
