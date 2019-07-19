@@ -223,6 +223,10 @@ void registerLuaBindings(sol::state_view _lua)
         &RenderWindow::imGuiInterface,
         "quickDraw",
         &RenderWindow::quickDraw,
+        "setTargetFps",
+        &RenderWindow::setTargetFps,
+        "removeTargetFps",
+        &RenderWindow::removeTargetFps,
         "frameImage",
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &
@@ -243,6 +247,8 @@ void registerLuaBindings(sol::state_view _lua)
         &RenderWindow::fps,
         "frameCount",
         &RenderWindow::frameCount,
+        "targetFps",
+        &RenderWindow::targetFps,
         "drawPathOutline",
         sol::overload(
             &RenderWindow::drawPathOutline,
