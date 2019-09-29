@@ -1,8 +1,6 @@
 #include <Chuckle/ChuckleLuaBindings.hpp>
-
 #include <ChuckleCore/ChuckleCore.hpp>
 // #include <StickLuaSol/StickLuaSol.hpp>
-#include <LukeLuaSol/LukeLuaSol.hpp>
 #include <DabLuaSol/DabLuaSol.hpp>
 #include <LukeLuaSol/LukeLuaSol.hpp>
 #include <PaperLuaSol/PaperLuaSol.hpp>
@@ -92,6 +90,10 @@ void registerLuaBindings(sol::state_view _lua)
     globals.set_function("random", sol::overload(randomf, [](Float32 _min, Float32 _max) {
                              return randomf(_min, _max);
                          }));
+    globals.set_function(
+        "randomVec2",
+        sol::overload(sol::resolve<Vec2f(Float32, Float32, Float32, Float32)>(randomVec2f),
+                      [](Float32 _min, Float32 _max) { return randomVec2f(_min, _max); }));
     globals.set_function("setNoiseSeed", setNoiseSeed);
     globals.set_function("randomizeNoiseSeed", randomizeNoiseSeed);
     globals.set_function(
@@ -152,6 +154,20 @@ void registerLuaBindings(sol::state_view _lua)
         &QuickDraw::flush,
         "rect",
         &QuickDraw::rect,
+        "tex",
+        sol::overload(&QuickDraw::tex,
+                      [](QuickDraw * _self,
+                         const Texture * _tex,
+                         Float32 _minX,
+                         Float32 _minY,
+                         Float32 _maxX,
+                         Float32 _maxY) { _self->tex(_tex, _minX, _minY, _maxX, _maxY); }),
+        "defaultSampler",
+        &QuickDraw::defaultSampler,
+        "nearestSampler",
+        &QuickDraw::nearestSampler,
+        "bilinearSampler",
+        &QuickDraw::bilinearSampler,
         "lineRect",
         &QuickDraw::lineRect,
         "lines",
@@ -231,6 +247,12 @@ void registerLuaBindings(sol::state_view _lua)
         sol::overload((ImageUniquePtr(RenderWindow::*)()) & RenderWindow::frameImage,
                       (ImageUniquePtr(RenderWindow::*)(UInt32, UInt32, UInt32, UInt32)) &
                           RenderWindow::frameImage),
+        // [](RenderWindow * _self) {
+        //     auto img = _self->frameImage();
+        //     if (img->pixelTypeID() == pic::PixelRGBA8::pixelTypeID())
+        //         return stick::UniquePtr<ImageRGBA8>(std::move(img));
+        //     return stick::UniquePtr<ImageRGBA8>();
+        // },
         "saveFrame",
         sol::overload((Error(RenderWindow::*)(const char *)) & RenderWindow::saveFrame,
                       (Error(RenderWindow::*)(const char *, UInt32, UInt32, UInt32, UInt32)) &
@@ -240,6 +262,10 @@ void registerLuaBindings(sol::state_view _lua)
         "setDrawFunction",
         [](RenderWindow * _self, sol::function _fn) {
             _self->setDrawFunction([_fn](Float64 _duration) { return _fn(_duration); });
+        },
+        "setFrameFinishedCallback",
+        [](RenderWindow * _self, sol::function _fn) {
+            _self->setFrameFinishedCallback([_fn]() { return _fn(); });
         },
         "run",
         &RenderWindow::run,
@@ -266,13 +292,14 @@ void registerLuaBindings(sol::state_view _lua)
             _self->drawMultiplePathOutlines(&items[0], items.count(), _ri, _col, _bDrawChildren);
         },
         "drawPathHandles",
-        sol::overload(&RenderWindow::drawPathHandles,
-                      [](RenderWindow * _self, Path * _path, const ColorRGBA & _col) {
-                          _self->drawPathHandles(_path, _col);
-                      },
-                      [](RenderWindow * _self, Path * _path, const ColorRGBA & _col, Float32 _rad) {
-                          _self->drawPathHandles(_path, _col, _rad);
-                      }),
+        sol::overload(
+            &RenderWindow::drawPathHandles,
+            [](RenderWindow * _self, Path * _path, const ColorRGBA & _col) {
+                _self->drawPathHandles(_path, _col);
+            },
+            [](RenderWindow * _self, Path * _path, const ColorRGBA & _col, Float32 _rad) {
+                _self->drawPathHandles(_path, _col, _rad);
+            }),
         "drawMultiplePathHandles",
         [](RenderWindow * _self,
            sol::table _paths,

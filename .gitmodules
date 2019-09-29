@@ -40,3 +40,6 @@
 [submodule "subprojects/PicLuaSol"]
 	path = subprojects/PicLuaSol
 	url = https://github.com/mokafolio/PicLuaSol.git
+[submodule "subprojects/Box2D"]
+	path = subprojects/Box2D
+	url = https://github.com/erincatto/Box2D.git

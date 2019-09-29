@@ -4,6 +4,7 @@
 
 #include <Chuckle/ChuckleLuaBindings.hpp>
 #include <Chuckle/ImGuiLuaBindings.hpp>
+#include <Chuckle/Box2DLuaBindings.hpp>
 #include <ChuckleCore/ChuckleCore.hpp>
 
 #define RETURN_ON_ERR(_err)                                                                        \
@@ -38,6 +39,7 @@ int main(int _argc, const char * _args[])
                            sol::lib::table);
         chuckle::registerLuaBindings(lua);
         chuckle::registerImGuiBindings(lua);
+        chuckle::registerBox2DBindings(lua);
 
         String dirName = chuckle::executableDirectoryName();
         String packagePath("package.path = package.path .. ';");

@@ -1,4 +1,4 @@
-project('Chuckle', ['cpp', 'c'], default_options : ['cpp_std=c++14', 'prefix=/opt/Chuckle', 'default_library=static'])
+project('Chuckle', ['cpp', 'c'], default_options : ['cpp_std=c++14', 'prefix=/opt/Chuckle', 'libdir=lib', 'default_library=static'])
 
 cc = meson.get_compiler('cpp')
 
@@ -33,6 +33,8 @@ endif
 
 deps += luaDep
 
+deps += cc.find_library('Box2D', required : true)
+
 incDirs = include_directories('.')
 
 if host_machine.system() == 'linux'
@@ -40,8 +42,11 @@ if host_machine.system() == 'linux'
 endif
 
 name = 'chuckle'
-bindir = join_paths(get_option('prefix'), 'bin')
-chuckle = executable(name, ['Chuckle/Chuckle.cpp', 
+bindir = join_paths(get_option('prefix'), get_option('bindir'))
+libdir = join_paths(get_option('prefix'), get_option('libdir'))
+chuckle = executable(name, [
+    'Chuckle/Box2DLuaBindings.cpp',
+    'Chuckle/Chuckle.cpp', 
     'Chuckle/ChuckleLuaBindings.cpp',
     'Chuckle/CrunchLuaSol.cpp',
     'Chuckle/DabLuaSol.cpp',
@@ -52,6 +57,7 @@ chuckle = executable(name, ['Chuckle/Chuckle.cpp',
     dependencies: deps, 
     cpp_args:'-ftemplate-depth=10000', #for sol lua binding compilation on gcc oO
     include_directories: incDirs,
+    install_rpath: libdir,
     install: true)
 
 install_subdir('Scripts', install_dir:'.')
