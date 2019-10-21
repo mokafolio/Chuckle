@@ -62,6 +62,20 @@ class Box2DDebugDraw : public b2Draw
     QuickDraw * m_qd;
 };
 
+template <class T>
+sol::table box2DListToTable(sol::state_view _lua, T * _list)
+{
+    sol::table ret = _lua.create_table();
+    Size i = 1;
+    while (_list)
+    {
+        ret[i++] = _list;
+        _list = _list->GetNext();
+    }
+
+    return ret;
+}
+
 void registerBox2DBindings(sol::state_view _lua)
 {
     _lua.new_enum("b2BodyType",
@@ -152,8 +166,31 @@ void registerBox2DBindings(sol::state_view _lua)
         &b2World::GetAutoClearForces,
         "shiftOrigin",
         &b2World::ShiftOrigin,
+        "getContactList",
+        [](b2World * _self, sol::this_state _s) {
+            sol::state_view lua(_s);
+            return box2DListToTable(lua, _self->GetContactList());
+        },
         "dump",
         &b2World::Dump);
+
+    // /// Get the list of all fixtures attached to this body.
+    // b2Fixture* GetFixtureList();
+    // const b2Fixture* GetFixtureList() const;
+
+    // /// Get the list of all joints attached to this body.
+    // b2JointEdge* GetJointList();
+    // const b2JointEdge* GetJointList() const;
+
+    // /// Get the list of all contacts attached to this body.
+    // /// @warning this list changes during the time step and you may
+    // /// miss some collisions if you don't use b2ContactListener.
+    // b2ContactEdge* GetContactList();
+    // const b2ContactEdge* GetContactList() const;
+
+    // /// Get the next body in the world's body list.
+    // b2Body* GetNext();
+    // const b2Body* GetNext() const;
 
     _lua.new_usertype<b2Body>(
         "b2Body",
@@ -171,7 +208,11 @@ void registerBox2DBindings(sol::state_view _lua)
         "setTransform",
         &b2Body::SetTransform,
         "getPosition",
-        &b2Body::GetPosition,
+        [](b2Body * _self) {
+            b2Vec2 tmp = _self->GetPosition();
+            return tmp;
+        },
+        // &b2Body::GetPosition,
         "getAngle",
         &b2Body::GetAngle,
         "getWorldCenter",
@@ -246,10 +287,125 @@ void registerBox2DBindings(sol::state_view _lua)
         &b2Body::SetFixedRotation,
         "isFixedRotation",
         &b2Body::IsFixedRotation,
+        "getFixtureList",
+        [](b2Body * _self, sol::this_state _s) {
+            sol::state_view lua(_s);
+            return box2DListToTable(lua, _self->GetFixtureList());
+        },
+        // "getJointList",
+        // [](b2Body * _self, sol::this_state _s) {
+        //     sol::state_view lua(_s);
+        //     return box2DListToTable(lua, _self->GetJointList());
+        // },
+        // "getContactList",
+        // [](b2Body * _self, sol::this_state _s) {
+        //     sol::state_view lua(_s);
+        //     return box2DListToTable(lua, _self->GetContactList());
+        // },
         "getWorld",
         sol::resolve<b2World *()>(&b2Body::GetWorld),
         "dump",
         &b2Body::Dump);
+
+    _lua.new_usertype<b2Vec2>("b2Vec2",
+                              sol::call_constructor,
+                              sol::constructors<b2Vec2(), b2Vec2(float32, float32)>(),
+                              "x",
+                              &b2Vec2::x,
+                              "y",
+                              &b2Vec2::y);
+
+    _lua.new_usertype<b2AABB>("b2AABB",
+                              sol::call_constructor,
+                              sol::constructors<b2AABB()>(),
+                              "isValid",
+                              &b2AABB::IsValid,
+                              "getCenter",
+                              &b2AABB::GetCenter,
+                              "getExtents",
+                              &b2AABB::GetExtents,
+                              "getPerimeter",
+                              &b2AABB::GetPerimeter,
+                              "combine",
+                              sol::resolve<void(const b2AABB &)>(&b2AABB::Combine),
+                              "contains",
+                              &b2AABB::Contains,
+                              "upperBound",
+                              &b2AABB::upperBound,
+                              "lowerBound",
+                              &b2AABB::lowerBound);
+
+    _lua.new_usertype<b2JointDef>("b2JointDef",
+                                  sol::call_constructor,
+                                  sol::constructors<b2JointDef()>(),
+                                  "type",
+                                  &b2JointDef::type,
+                                  "bodyA",
+                                  &b2JointDef::bodyA,
+                                  "bodyB",
+                                  &b2JointDef::bodyB,
+                                  "collideConnected",
+                                  &b2JointDef::collideConnected);
+
+    _lua.new_usertype<b2DistanceJointDef>("b2DistanceJointDef",
+                                          sol::base_classes,
+                                          sol::bases<b2JointDef>(),
+                                          sol::call_constructor,
+                                          sol::constructors<b2DistanceJointDef()>(),
+                                          "localAnchorA",
+                                          &b2DistanceJointDef::localAnchorA,
+                                          "localAnchorB",
+                                          &b2DistanceJointDef::localAnchorB,
+                                          "length",
+                                          &b2DistanceJointDef::length,
+                                          "frequencyHz",
+                                          &b2DistanceJointDef::frequencyHz,
+                                          "dampingRatio",
+                                          &b2DistanceJointDef::dampingRatio);
+
+    _lua.new_usertype<b2RevoluteJointDef>("b2RevoluteJointDef",
+                                          sol::base_classes,
+                                          sol::bases<b2JointDef>(),
+                                          sol::call_constructor,
+                                          sol::constructors<b2RevoluteJointDef()>(),
+                                          "initialize",
+                                          &b2RevoluteJointDef::Initialize,
+                                          "localAnchorA",
+                                          &b2RevoluteJointDef::localAnchorA,
+                                          "localAnchorB",
+                                          &b2RevoluteJointDef::localAnchorB,
+                                          "referenceAngle",
+                                          &b2RevoluteJointDef::referenceAngle,
+                                          "enableLimit",
+                                          &b2RevoluteJointDef::enableLimit,
+                                          "lowerAngle",
+                                          &b2RevoluteJointDef::lowerAngle,
+                                          "upperAngle",
+                                          &b2RevoluteJointDef::upperAngle,
+                                          "enableMotor",
+                                          &b2RevoluteJointDef::enableMotor,
+                                          "motorSpeed",
+                                          &b2RevoluteJointDef::motorSpeed,
+                                          "maxMotorTorque",
+                                          &b2RevoluteJointDef::maxMotorTorque);
+
+    _lua.new_usertype<b2WeldJointDef>("b2WeldJointDef",
+                                      sol::base_classes,
+                                      sol::bases<b2JointDef>(),
+                                      sol::call_constructor,
+                                      sol::constructors<b2WeldJointDef()>(),
+                                      "initialize",
+                                      &b2WeldJointDef::Initialize,
+                                      "localAnchorA",
+                                      &b2WeldJointDef::localAnchorA,
+                                      "localAnchorB",
+                                      &b2WeldJointDef::localAnchorB,
+                                      "referenceAngle",
+                                      &b2WeldJointDef::referenceAngle,
+                                      "frequencyHz",
+                                      &b2WeldJointDef::frequencyHz,
+                                      "dampingRatio",
+                                      &b2WeldJointDef::dampingRatio);
 
     _lua.new_usertype<b2Joint>("b2Joint",
                                "new",
@@ -308,6 +464,8 @@ void registerBox2DBindings(sol::state_view _lua)
                                  &b2Fixture::SetRestitution,
                                  "getRestitution",
                                  &b2Fixture::GetRestitution,
+                                 "getAABB",
+                                 &b2Fixture::GetAABB,
                                  "dump",
                                  &b2Fixture::Dump);
 
@@ -351,9 +509,14 @@ void registerBox2DBindings(sol::state_view _lua)
         "validate",
         &b2PolygonShape::Validate,
         "setAsBox",
-        sol::overload(sol::resolve<void(float32, float32)>(&b2PolygonShape::SetAsBox),
-                      sol::resolve<void(float32, float32, const b2Vec2 &, float32)>(
-                          &b2PolygonShape::SetAsBox)));
+        sol::overload(
+            sol::resolve<void(float32, float32)>(&b2PolygonShape::SetAsBox),
+            //@TODO: There seems to be a bug in sol overload resolution (at least int he version we
+            // are using) where it does not properly resolve if _vec is b2Vec2 and we pass in a
+            // table, so we just expect a table for now...
+            [](b2PolygonShape * _self, float32 _hw, float32 _hh, sol::table _vec, float32 _angle) {
+                _self->SetAsBox(_hw, _hh, b2Vec2(_vec[1], _vec[2]), _angle);
+            }));
 
     _lua.new_usertype<b2Draw>("b2Draw", "new", sol::no_constructor, "setFlags", &b2Draw::SetFlags);
 
@@ -362,6 +525,12 @@ void registerBox2DBindings(sol::state_view _lua)
                                       sol::bases<b2Draw>(),
                                       sol::call_constructor,
                                       sol::constructors<Box2DDebugDraw(QuickDraw &)>());
+
+    //     _lua.set_function(
+    //         "testB2d",
+    //         [](b2PolygonShape * _self, float32 _a, float32 _b, b2Vec2 _vec, float32 _d, int _e) {
+    //             printf("foooch %f %f\n", _vec.x, _vec.y);
+    //         });
 }
 
 } // namespace chuckle
@@ -441,44 +610,91 @@ struct getter<b2BodyDef>
     }
 };
 
-template <>
-struct checker<b2JointDef>
-{
-    template <typename Handler>
-    static bool check(lua_State * L, int index, Handler && handler, record & tracking)
-    {
-        return sol::stack::check<sol::table>(L, index);
-    }
-};
+// template <class JDT>
+// JDT jointDefHelper(sol::table tbl)
+// {
+//     JDT ret;
 
-template <>
-struct getter<b2JointDef>
-{
-    static b2JointDef get(lua_State * L, int index, record & tracking)
-    {
-        b2JointDef ret;
+//     sol::optional<b2JointType> ot = tbl["type"];
+//     if (ot)
+//         ret.type = ot.value();
 
-        sol::table tbl = sol::stack::get<sol::table>(L, lua_absindex(L, index), tracking);
+//     sol::optional<b2Body *> oa = tbl["bodyA"];
+//     if (oa)
+//         ret.bodyA = oa.value();
 
-        sol::optional<b2JointType> ot = tbl["type"];
-        if (ot)
-            ret.type = ot.value();
+//     sol::optional<b2Body *> ob = tbl["bodyB"];
+//     if (ob)
+//         ret.bodyB = ob.value();
 
-        sol::optional<b2Body *> oa = tbl["bodyA"];
-        if (oa)
-            ret.bodyA = oa.value();
+//     sol::optional<bool> oc = tbl["collideConnected"];
+//     if (oc)
+//         ret.collideConnected = oc.value();
 
-        sol::optional<b2Body *> ob = tbl["bodyB"];
-        if (ob)
-            ret.bodyB = ob.value();
+//     return ret;
+// }
 
-        sol::optional<bool> oc = tbl["collideConnected"];
-        if (oc)
-            ret.collideConnected = oc.value();
+// template <>
+// struct checker<b2JointDef>
+// {
+//     template <typename Handler>
+//     static bool check(lua_State * L, int index, Handler && handler, record & tracking)
+//     {
+//         return sol::stack::check<sol::table>(L, index);
+//     }
+// };
 
-        return ret;
-    }
-};
+// template <>
+// struct getter<b2JointDef>
+// {
+//     static b2JointDef get(lua_State * L, int index, record & tracking)
+//     {
+//         sol::table tbl = sol::stack::get<sol::table>(L, lua_absindex(L, index), tracking);
+//         return jointDefHelper<b2JointDef>(tbl);
+//     }
+// };
+
+// template <>
+// struct checker<b2DistanceJointDef>
+// {
+//     template <typename Handler>
+//     static bool check(lua_State * L, int index, Handler && handler, record & tracking)
+//     {
+//         return sol::stack::check<sol::table>(L, index);
+//     }
+// };
+
+// template <>
+// struct getter<b2DistanceJointDef>
+// {
+//     static b2DistanceJointDef get(lua_State * L, int index, record & tracking)
+//     {
+//         sol::table tbl = sol::stack::get<sol::table>(L, lua_absindex(L, index), tracking);
+//         b2DistanceJointDef ret = jointDefHelper<b2DistanceJointDef>(tbl);
+
+//         sol::optional<b2Vec2> ola = tbl["localAnchorA"];
+//         if (ola)
+//             ret.localAnchorA = ola.value();
+
+//         sol::optional<b2Vec2> olb = tbl["localAnchorB"];
+//         if (olb)
+//             ret.localAnchorB = olb.value();
+
+//         sol::optional<float32> ol = tbl["length"];
+//         if (ol)
+//             ret.length = ol.value();
+
+//         sol::optional<float32> ofhz = tbl["frequencyHz"];
+//         if (ofhz)
+//             ret.frequencyHz = ofhz.value();
+
+//         sol::optional<float32> odr = tbl["dampingRatio"];
+//         if (odr)
+//             ret.dampingRatio = odr.value();
+
+//         return ret;
+//     }
+// };
 
 template <>
 struct checker<b2FixtureDef>
@@ -513,7 +729,7 @@ struct getter<b2FixtureDef>
 
         sol::optional<float32> od = tbl["density"];
         if (od)
-            ret.density = of.value();
+            ret.density = od.value();
 
         sol::optional<bool> ois = tbl["isSensor"];
         if (ois)

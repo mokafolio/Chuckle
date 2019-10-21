@@ -2,6 +2,7 @@
 #define CHUCKLE_CHUCKLELUABINDINGS_HPP
 
 #include <Stick/Platform.hpp>
+#include <type_traits>
 #include <sol/sol.hpp>
 
 namespace chuckle

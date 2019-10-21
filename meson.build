@@ -35,7 +35,7 @@ deps += luaDep
 
 deps += cc.find_library('Box2D', required : true)
 
-incDirs = include_directories('.')
+incDirs = include_directories('.', 'Libs')
 
 if host_machine.system() == 'linux'
     deps += cc.find_library('dl', required : true)

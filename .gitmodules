@@ -43,3 +43,6 @@
 [submodule "subprojects/Box2D"]
 	path = subprojects/Box2D
 	url = https://github.com/erincatto/Box2D.git
+[submodule "subprojects/Tink"]
+	path = subprojects/Tink
+	url = https://github.com/mokafolio/Tink.git
