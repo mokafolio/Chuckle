@@ -352,6 +352,8 @@ void registerBox2DBindings(sol::state_view _lua)
                                           sol::bases<b2JointDef>(),
                                           sol::call_constructor,
                                           sol::constructors<b2DistanceJointDef()>(),
+                                          "initialize",
+                                          &b2DistanceJointDef::Initialize,
                                           "localAnchorA",
                                           &b2DistanceJointDef::localAnchorA,
                                           "localAnchorB",

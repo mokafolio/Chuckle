@@ -9,6 +9,7 @@ lukeLuaSolProj = subproject('LukeLuaSol')
 paperLuaSolProj = subproject('PaperLuaSol')
 dabLuaSolProj = subproject('DabLuaSol')
 picLuaSol = subproject('PicLuaSol')
+utf8er = subproject('utf8er')
 
 deps = [chuckleCoreProj.get_variable('chuckleCoreDep'), 
         stickLuaSolProj.get_variable('stickLuaDep'),
@@ -16,7 +17,8 @@ deps = [chuckleCoreProj.get_variable('chuckleCoreDep'),
         lukeLuaSolProj.get_variable('lukeLuaDep'),
         paperLuaSolProj.get_variable('paperLuaDep'),
         dabLuaSolProj.get_variable('dabLuaDep'),
-        picLuaSol.get_variable('picLuaDep')]
+        picLuaSol.get_variable('picLuaDep'),
+        utf8er.get_variable('utf8erDep')]
 
 # meseon dependency function to find lua is not very consistent accross platforms yet, so
 # we need to do a lot of manual lifting for now
